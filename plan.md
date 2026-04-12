@@ -137,11 +137,11 @@ One P115 contactor per element; 1 or 2 elements fitted depending on heating rate
 
 | Component | Part | Status |
 |---|---|---|
-| Microcontroller | ESP32 dev board | on hand |
+| Microcontroller | AITRIP ESP32-WROOM-32, 30-pin DevKit, CP2102 USB-C (ESP-WROOM-32) | on hand |
 | Contactor (one per element) | P115BDA (12V coil, 50A rated) | on hand |
 | Buck converter | 48V→12V, ≥58V input rating (e.g. Pololu D57V45F12 or equiv) | TBD |
 | Thermistor | NTC 10kΩ @ 25°C, B=3950, M4 probe | TBD |
-| Relay module | SRD-12VDC-SL-C module board (12V coil, transistor driver — signal from ESP32 GPIO) | TBD |
+| Relay module | Pololu 2482 (Basic SPDT Relay Carrier, 12VDC, active-high EN pin) × 2 — one per contactor | TBD |
 | Snap disc thermostat | NC, opens at 110°F | TBD |
 
 ### Open Questions
@@ -150,7 +150,7 @@ One P115 contactor per element; 1 or 2 elements fitted depending on heating rate
 - [x] **Outlet thermistor placement:** resolved — NTC surface-mounted on copper outlet nipple with thermal paste and self-fusing silicone tape (see Sensor nipples in BOM above)
 - [ ] **Stripboard layout:** decide whether to build ESP32 driver circuit on stripboard now or breadboard for initial testing; not a design question, a build sequencing decision
 - [ ] **Hysteresis band:** characterize thermal lag at outlet thermistor vs element on/off at 0.5 GPM; set deadband wide enough to prevent rapid contactor cycling
-- [ ] **Relay module active-high vs active-low:** SRD-12VDC-SL-C modules vary — some are active-low (GPIO low = relay energized), some active-high. At power-up, before the ESP32 boots and firmware takes over, the signal line floats or defaults low depending on the board. If the module is active-low and the signal line floats low, the relay closes and the P115 coil is energized briefly — heating element on before firmware runs. Confirm the specific module's default input state and whether it is safe at boot. Prefer a module that defaults to relay-off (contacts open, element disconnected) before firmware asserts control.
+- [x] **Relay module active-high vs active-low:** resolved — use Pololu 2482 (active-high, BSS138K MOSFET driver, EN threshold 2.5V). Relay stays off when EN is low or floating. On the 30-pin WROOM-32 board, most GPIOs boot low; drive from GPIO25 and GPIO26 (safe output pins, not strapping pins, confirmed present on 30-pin board). Add a 10kΩ pull-down from each EN pin to GND on the stripboard as belt-and-suspenders against any float at power-on. In firmware: initialize pin LOW before setting OUTPUT mode. Avoid strapping pins GPIO0, GPIO2, GPIO5, GPIO12, GPIO15. Also avoid GPIO6–11 (flash), GPIO34/35/36/39 (input-only).
 - [ ] **PRV (pressure relief valve):** Entry 12 flags PRV as good practice for thermal expansion. The Suburban tank is staying plumbed in (triclamp is an additional under-counter stage, not a replacement). Explore: (a) whether the Suburban's existing PRV already covers the triclamp vessel — likely yes if both share the common supply line with no isolation valve between them; (b) if a dedicated PRV is needed, where it would drain (under-counter drain pan? existing Suburban drain line?); (c) whether the open RV system makes thermal expansion a non-issue in normal operation, leaving only the both-valves-closed edge case to design for.
 - [x] **SS304 vs SS316L for potable water:** resolved — SS304 DERNORD parts are fine. 316L is a longevity improvement, not a safety matter. Water is used for hands and dishes only (no ingestion), SS304 is food-grade, and temperatures are low (80–104°F). See explore.md Entry 20.
 - [ ] **Winterization / blowout:** the DERNORD element enters from the right end cap and is the lowest point in the tank. A compressed-air blowout from the inlet port should clear the main tank body, but water pooled at and around the element base may not fully evacuate. Confirm whether residual water at the element poses freeze damage risk, and whether a drain port or specific blowout procedure is needed (e.g. blow from outlet, drain from inlet, or accept a small residual volume).

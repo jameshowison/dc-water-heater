@@ -494,6 +494,33 @@ On further review, the concern is overstated for this application:
 - This water is used for handwashing and dishes only — not consumed directly. No ingestion pathway; skin contact with any trace dissolved metals at realistic SS304 leaching rates is a non-issue.
 - 316L parts are available from Sanitary Fittings and GVC Direct at modest premium (~$10–20 per fitting) if longevity is a concern in the future, but this is not a procurement blocker.
 
+---
+
+## Entry 21 — Relay Module Selection: Active-High vs Active-Low, Boot Safety (2026-04-12)
+
+**Question:** The plan flagged the SRD-12VDC-SL-C relay module as TBD pending confirmation of active-high vs active-low behavior and safe boot state. If the module is active-low and the ESP32 GPIO floats low at power-on, the P115 contactor coil is briefly energized before firmware runs — element on before any temperature check.
+
+**ESP32 board on hand:** AITRIP 30-pin ESP32-WROOM-32 DevKit, CP2102 USB-C. Standard WROOM-32 silicon; 30-pin layout exposes GPIO25 and GPIO26 among others.
+
+**SRD-based boards rejected:** Cheap Chinese SRD-12VDC-SL-C optocoupler boards are typically active-low. Several ESP32 GPIOs pulse low briefly during boot and reset, which would briefly fire the relay. The firmware fix (`digitalWrite(pin, HIGH)` before `pinMode`) runs after the HAL initializes — not early enough to prevent the transient. Too fragile for a heating element circuit.
+
+**Selected module: Pololu 2482** (Basic SPDT Relay Carrier with 12VDC Relay, assembled). Key properties:
+- **Active-high:** relay coil fires when EN > 2.5V (up to 20V), driven by BSS138K N-channel MOSFET. Relay stays off when EN is low or floating.
+- Most ESP32 GPIOs default low at boot → relay off before firmware runs. Safe by default.
+- Coil powered separately via VDD/GND (12V); EN signal is the only GPIO connection.
+- Omron G5LE-14-DC12 relay inside, 10A rated — more than adequate for the 12V P115 coil signal path.
+
+**GPIO selection — 30-pin WROOM-32:**
+- Use **GPIO25** and **GPIO26** (one per Pololu 2482, one per P115 contactor).
+- Both confirmed present on the 30-pin layout; no boot-mode complications; not strapping pins.
+- Avoid: GPIO0, GPIO2, GPIO5, GPIO12, GPIO15 (strapping pins); GPIO6–11 (flash); GPIO34/35/36/39 (input-only).
+
+**Additional hardware mitigation:** Add a 10kΩ pull-down resistor from each EN pin to GND on the stripboard. This holds EN low during the brief window at power-on when the GPIO is in high-impedance (input) mode before firmware asserts it as OUTPUT LOW. Belt-and-suspenders against floating gate on the BSS138K (Pololu schematic not confirmed to include an internal pull-down).
+
+**Firmware note:** In setup(), initialize both relay GPIOs LOW before calling pinMode(pin, OUTPUT). This ensures the pin state is set before the output driver is enabled.
+
+**Conclusion:** Pololu 2482 × 2 selected, active-high, GPIO25 + GPIO26, 10kΩ pull-downs on stripboard. Relay module open question closed.
+
 **BOM unchanged — SS304 DERNORD parts already on hand are fine.**
 
 **Note:** The snap disc and NTC thermistor are surface-mounted on external copper nipples — no direct water contact with those sensors.
