@@ -527,4 +527,26 @@ On further review, the concern is overstated for this application:
 
 ---
 
+## Entry 22 — Dry-Fire Protection: Snap Disc Inadequate; Thermowell-Based Fuse Under Consideration (2026-04-12)
+
+**Question:** Does the snap disc (NC, opens at 110°F, surface-mounted on outlet copper nipple) provide adequate dry-fire protection for the DERNORD element?
+
+**Conclusion: No.** The snap disc measures water temperature through the outlet nipple. Its thermal path is: element heats → water heats → copper nipple heats → snap disc trips. In a true dry-fire condition (element exposed to air), there is no water to carry heat to the sensor. The element sheath can reach 1000°F+ in seconds while the snap disc never sees elevated temperatures. The snap disc is correctly understood as a water temperature safety limit, not element protection — these are two separate concerns.
+
+**DERNORD 48V/1500W element:** No built-in ECO disc or thermal cutoff. Confirmed from product page — protection is entirely external.
+
+**Industrial precedent:** Process Technology's "Protector 1" system is a direct commercial example of Option A: a heat-sensitive fuse physically in contact with the heater sheath, wired in series with power. Used as standard practice in industrial plating/surface finishing tanks. Validates the concept.
+
+**Three options evaluated:**
+
+- **Option A — Thermal fuse bonded to element sheath:** A one-shot thermal cutoff (~216°C trip) physically in contact with the DERNORD sheath, wired in series with the 12V coil signal. Cheap, passive, independent of firmware. Problem: leads must exit the tank. The only clean implementation is a thermowell penetrating the tank wall — same reason the NTC and snap disc use external copper nipples. Current tank BOM has both ½" NPT side ports spoken for (inlet: PEX + NTC; outlet: faucet fitting + snap disc). A third port or co-location arrangement would be needed.
+
+- **Option B — Pressure switch in supply line:** Normally-open pressure switch in series with coil signal; de-energizes element if supply pressure drops below threshold. Protects against pressurization loss but adds a new failure mode and doesn't cover all dry-fire scenarios.
+
+- **Option C — Accept risk:** In a pressurized RV system the tank is essentially always full while the pump runs. Element is at the lowest point (U-bend, right end). Partial drain to element-exposure level would require a significant leak — likely noticed (wet cabinet). Winterization-error scenario (tank drained, heater accidentally powered on) is the main risk Option C leaves unaddressed.
+
+**Status: undecided.** Tank port availability is the key constraint for Option A. Pressure switch (Option B) to be explored next as an alternative that doesn't require a new tank port.
+
+---
+
 *Journal continues as design progresses. See `plan.md` for current state.*
