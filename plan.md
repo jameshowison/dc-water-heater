@@ -15,11 +15,12 @@ Point-of-use heating under the counter at the kitchen faucet:
 ```
 48V battery
     │
-    ├─── [ANL fuse 80A] ─── [EV200 contactor] ─── [P115 contactor(s)] ─── DERNORD element(s)
-    │                                                                                │
-    │                                                                    Triclamp tank (pre-tempered store)
-    │                                                                                │
-    │                                                                         Faucet outlet
+    ├─── [ANL fuse 80A] ─── [P115 contactor] ─── DERNORD element
+    │                  └─── [P115 contactor] ─── DERNORD element   (optional second element)
+    │                                                   │
+    │                                         Triclamp tank (pre-tempered store)
+    │                                                   │
+    │                                            Faucet outlet
     │
     └─── [48V→12V buck] ─── ESP32 + relay module + sensors
 ```
@@ -73,33 +74,32 @@ Custom triclamp stainless vessel (see explore.md Entry 8 for rationale and full 
 ### Architecture
 
 ```
-48V bus → [ANL fuse 80A] → [EV200 contactor] → [P115 contactor(s)] → DERNORD element(s)
+48V bus → [ANL fuse 80A] → [P115 contactor] → DERNORD element
+                       └→ [P115 contactor] → DERNORD element   (optional second element)
 48V bus → [48V→12V buck] → ESP32 + relay module
-Flow switch in series with EV200 coil → hard disconnect on flow stop, independent of ESP32
-NTC thermistor (10kΩ @ 25°C, B=3950, M4 probe) at tank outlet
-Snap disc thermostat (NC, opens at 110°F) in series with contactor coil signal — hardware safety cutoff
+ESP32 → relay module → 12V coil signal → P115 contactor(s)
+Snap disc (NC, opens at 110°F) in series with 12V coil signal — hardware safety cutoff
+NTC thermistor (10kΩ @ 25°C, B=3950, M4 probe) at tank outlet → ESP32 ADC
 ESP32 thermostat: setpoint A ~80°F (maintain), setpoint B ~104°F (boost), one-button toggle
 ```
 
-ESP32 acts as a configurable thermostat — reads outlet thermistor, energizes P115 contactor(s) via relay module to switch element power on/off. No PWM or FET in the power path. Staged power (1× or 2× elements via P115 contactors) selects heat rate; thermostat logic controls duty cycle within the active stage.
+One P115 contactor per element; 1 or 2 elements fitted depending on heating rate needed. ESP32 reads outlet thermistor and signals contactor coil(s) via relay module — no FET or PWM in the power path.
 
 ### Components
 
 | Component | Part | Status |
 |---|---|---|
 | Microcontroller | ESP32 dev board | on hand |
-| Master contactor | EV200 (12V coil, 500A rated) | on hand |
-| Per-element contactor | P115BDA (12V coil, 50A rated) | on hand |
+| Contactor (one per element) | P115BDA (12V coil, 50A rated) | on hand |
 | Buck converter | Pololu D24V10F5 or equiv (48V→5V) | TBD |
 | Thermistor | NTC 10kΩ @ 25°C, B=3950, M4 probe | TBD |
-| Flow switch | TBD | TBD |
 | Relay module | SRD-05VDC-SL-C (5V) | TBD |
 | Snap disc thermostat | NC, opens at 110°F | TBD |
 
 ### Open Questions
 
+- [ ] **Water level / dry-fire protection:** tank is normally always full (pressurized system), but confirm whether a low-water sensor is needed; options include a float switch or level probe wired in series with the contactor coil signal
 - [ ] **Outlet thermistor placement:** where to locate on triclamp tank for accurate outlet temp reading
-- [ ] **Minimum flow threshold:** flow switch must activate above dribble flow to prevent dry-fire; identify suitable paddle/flow switch and its threshold
 - [ ] **Stripboard layout:** ESP32 driver circuit not yet produced
 - [ ] **Hysteresis band:** characterize thermal lag at outlet thermistor vs element on/off at 0.5 GPM; set deadband wide enough to prevent rapid contactor cycling
 
@@ -117,3 +117,4 @@ ESP32 acts as a configurable thermostat — reads outlet thermistor, energizes P
 | Triclamp tank not Fogatti drop-in | Custom triclamp vessel better fits under-counter two-stage architecture; see explore.md Entry 6 |
 | No propane water heating | Propane generator (if needed) charges 48V battery; single DC path serves all heating |
 | Contactors not FET/PWM for power switching | Resistive load; on/off thermostat via contactor is simpler, no gate drive problem, avoids PWM complexity; see explore.md Entry 15 |
+| P115 not EV200; no flow switch | Tank design — element always submerged, flow events not a dry-fire risk; EV200 justified only by flow switch role, now removed; P115 right-sized at 50A for 31A element load; see explore.md Entry 17 |

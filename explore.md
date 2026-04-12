@@ -381,9 +381,11 @@ At RV supply pressure (~60–80 PSI): well below the 150 PSI EPDM limit. No pres
 
 ---
 
-## Entry 16 — TMV Removed (2026-04-12)
+## Entry 14 — Faucet Body Heater: Concept Parked (2026-04-12)
 
-TMV (thermostatic mixing valve) was specified in Entry 2 for scald protection (hard cap at 49°C/120°F) and fine temperature control. With max setpoint now fixed at ~104°F (~40°C) — well below the 49°C scald threshold — there is no scald risk and no need for downstream mixing. Removed from design.
+**The concept:** A second heating stage at the point of use — a 2" SS sanitary tube body ~14" long (~840mL), DERNORD 48V/1500W element, Armaflex insulated, mounted vertically under the counter. Control via PIR motion sensor for predictive pre-heating, lever microswitch on faucet handle, NTC thermistor at outlet, and an NC solenoid gate held open only when water is at temperature. The idea was to eliminate any cold-water delay at the faucet and provide a boost stage fed from the upstream triclamp tank.
+
+**Decision:** Parked. The plan now covers a single-stage system: triclamp tank only. The faucet body heater adds significant complexity (additional element, solenoid gate, PIR, lever microswitch, second thermistor loop) before the simpler single-stage system has been built and validated. The concept is preserved here for future consideration once the tank stage is working.
 
 ---
 
@@ -399,11 +401,19 @@ TMV (thermostatic mixing valve) was specified in Entry 2 for scald protection (h
 
 ---
 
-## Entry 14 — Faucet Body Heater: Concept Parked (2026-04-12)
+## Entry 16 — TMV Removed (2026-04-12)
 
-**The concept:** A second heating stage at the point of use — a 2" SS sanitary tube body ~14" long (~840mL), DERNORD 48V/1500W element, Armaflex insulated, mounted vertically under the counter. Control via PIR motion sensor for predictive pre-heating, lever microswitch on faucet handle, NTC thermistor at outlet, and an NC solenoid gate held open only when water is at temperature. The idea was to eliminate any cold-water delay at the faucet and provide a boost stage fed from the upstream triclamp tank.
+TMV (thermostatic mixing valve) was specified in Entry 2 for scald protection (hard cap at 49°C/120°F) and fine temperature control. With max setpoint now fixed at ~104°F (~40°C) — well below the 49°C scald threshold — there is no scald risk and no need for downstream mixing. Removed from design.
 
-**Decision:** Parked. The plan now covers a single-stage system: triclamp tank only. The faucet body heater adds significant complexity (additional element, solenoid gate, PIR, lever microswitch, second thermistor loop) before the simpler single-stage system has been built and validated. The concept is preserved here for future consideration once the tank stage is working.
+---
+
+## Entry 17 — Flow Switch Removed; Contactor Simplified to P115 per Element (2026-04-12)
+
+**Flow switch removed:** The flow switch was originally wired in series with the EV200 coil as a hard dry-fire interlock — flow stops, element disconnects instantly. This made sense for an inline heater where the element is in a tube and flow is what keeps it cool. The current design is a small pressurized tank: the element is always submerged in standing water. Stopping the faucet doesn't endanger the element; the tank stays full. Thermostat-based temperature control is the appropriate trigger for a tank, not flow detection.
+
+**EV200 removed from circuit:** The EV200's role was specifically the flow-switch-triggered master disconnect. With the flow switch gone, there is no remaining function that justifies the EV200 in the power path. It is oversized (500A rated vs 31A load) and was never intended for thermostat cycling duty.
+
+**Architecture settled:** one P115BDA contactor per element, driven by ESP32 via relay module. P115 is rated 50A — 62% derating at 31A per element, appropriate for switching duty. One or two elements may be fitted; each gets its own P115. ANL fuse remains upstream for overcurrent protection; snap disc in series with coil signal for hardware thermal cutoff.
 
 ---
 
