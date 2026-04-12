@@ -51,13 +51,15 @@ Custom triclamp stainless vessel (see explore.md Entry 8 for rationale and full 
 
 ## 2. Heating Element — SETTLED
 
-**DERNORD 48V/1500W**, 1" NPSM thread, U-bend, Incoloy sheath, SS316 preferred (specify on order).
+**DERNORD 48V/1500W**, 1" NPSM thread, U-bend.
 
 - Cold resistance: ~1.54Ω → 1500W at 48V, ~31A per element
 - Two elements in parallel: ~0.77Ω → ~3000W at 48V
 - Incoloy sheath electrically isolates energized conductor from water — eliminates DC electrolysis concern (see explore.md Entries 5 and 9)
 
-**Build task:** measure actual cold resistance on delivery; verify sheath is SS316L not SUS304.
+**Build task:** measure actual cold resistance on delivery.
+
+This is ordered, but currently have a 1000W dernord element with same thread.
 
 ### Power Staging (with 2× DERNORD elements)
 
@@ -80,7 +82,7 @@ Custom triclamp stainless vessel (see explore.md Entry 8 for rationale and full 
 ESP32 → relay module → 12V coil signal → P115 contactor(s)
 Snap disc (NC, opens at 110°F) in series with 12V coil signal — hardware safety cutoff
 NTC thermistor (10kΩ @ 25°C, B=3950, M4 probe) at tank outlet → ESP32 ADC
-ESP32 thermostat: setpoint A ~80°F (maintain), setpoint B ~104°F (boost), one-button toggle
+ESP32 thermostat: setpoint A ~80°F (maintain), setpoint B ~104°F (boost), three state-button (off, maintain, boost). 
 ```
 
 One P115 contactor per element; 1 or 2 elements fitted depending on heating rate needed. ESP32 reads outlet thermistor and signals contactor coil(s) via relay module — no FET or PWM in the power path.
