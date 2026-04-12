@@ -74,7 +74,60 @@ At high outlet temperatures, scald risk is real. A TMV with a hard cap at 49°C 
 
 ---
 
-## Entry 3 — DC Tankless Heater: Elex Teardown and Rheem Vessel Strategy (2026-03-23, chat: baaf5cff)
+## Entry 3 — Rules of Thumb for Electric Water Heating (2026-03-22, chat: c8fa0155)
+
+A dedicated session working out the physics of electric water heating from first principles, motivated by two things: annoyance at the "you need 5 gallons to wash dishes" claim in RV forums, and the question of whether the battery-as-buffer concept from an impulse cooktop could be extended to hot water.
+
+**Key findings:**
+
+Resistance heating is 100% efficient — every watt becomes heat, making the math unusually clean.
+
+**Energy rules of thumb (US customary):**
+- 120 Wh/gal summer (70°F inlet → 120°F setpoint)
+- 200 Wh/gal winter (40°F inlet → 120°F setpoint)
+- Winter ≈ 1.5× summer (not 2×)
+- At 160°F setpoint: 300 Wh/gal — 50% more stored energy, same tank
+
+**Actual hot water volumes by activity:**
+
+| Activity | Gallons (hot) |
+|---|---|
+| Hand wash (hands) | 0.5 |
+| Dish basin | 5 |
+| Short shower (5 min, low-flow) | 5 |
+| Long shower (10 min) | 15 |
+
+A short shower and a dish basin are the same volume. Both are ~0.6–1.0 kWh depending on season.
+
+**Tankless power formula:** P (W) = flow (L/min) × ΔT (°C) × 69.8
+
+**The voltage/current wall:**
+
+At the sink in winter (2 L/min, ΔT = 45°C):
+
+| Voltage | Amps |
+|---|---|
+| 52V | 121A |
+| 120V | 52A |
+| 240V | 26A |
+
+**Mnemonic:** at 120V → ~50A per sink winter; at 52V → ~120A per sink winter. The system voltage and the amp draw swap. Shower = 5× sink flow = 5× amps. Tankless shower at 52V or 120V is not practical. **Tankless shower requires 240V or gas, full stop.**
+
+**Why low voltage doesn't work for high-power tankless:**
+
+A 4500W/52V element needs R = 0.6Ω. A 4500W/240V element has R = 12.8Ω. Getting 0.6Ω in the same tube requires ~20× larger wire cross-section — 4–5× the diameter — which won't coil into the element tube. Physical impossibility, not a design tradeoff.
+
+**Tank recharge at 52V / 1500W:**
+- ~14 minutes per shower-worth of water (from a warm tank)
+- ~60 minutes full cold recharge of 5 gallons
+
+**Conclusion:** The impulse cooktop buffer concept applies — charge slowly, deliver fast — but water tolerates a much gentler arrangement than cooking. A 5-gallon tank at 160°F stores ~1,500 Wh, enough for a full low-flow shower. Your existing tank, rewired to the DC bus with a DERNORD element, is already the answer.
+
+**Blog post produced:** `water-heating-offgrid.md` — long-form Hackaday-style post covering the full journey from irritation to rules of thumb. Tone: conversational, DIY/off-grid audience.
+
+---
+
+## Entry 4 — DC Tankless Heater: Elex Teardown and Rheem Vessel Strategy (2026-03-23, chat: baaf5cff)
 
 **Elex 5.5 kW unit:**
 
@@ -123,7 +176,7 @@ Physical inspection revealed RTEX copper flow tubes are ~1¼" diameter — too s
 
 ---
 
-## Entry 4 — DC Electrolysis Safety, Rewind Hard Stop, and Control Circuit BoM (2026-03-24, chat: 335e1db9)
+## Entry 5 — DC Electrolysis Safety, Rewind Hard Stop, and Control Circuit BoM (2026-03-24, chat: 335e1db9)
 
 **Nichrome rewind risks:**
 
@@ -170,7 +223,7 @@ NTC thermistors (10kΩ @ 25°C, B=3950, M4 probe) at inlet and outlet
 
 ---
 
-## Entry 5 — In-Faucet Heater with Incoloy Element: Full Design (2026-03-31, chat: 990abbdd)
+## Entry 6 — In-Faucet Heater with Incoloy Element: Full Design (2026-03-31, chat: 990abbdd)
 
 **Two-stage architecture confirmed:**
 
@@ -206,7 +259,7 @@ Evaluated aluminum block with cartridge heaters as alternative vessel. For the b
 
 ---
 
-## Entry 6 — Dernord Element Thread and Copper Pipe Vessel (2026-03-31, chat: 5343810f)
+## Entry 7 — Dernord Element Thread and Copper Pipe Vessel (2026-03-31, chat: 5343810f)
 
 **Thread clarification:**
 
@@ -221,7 +274,7 @@ Explored 2" copper pipe as tank body with a soldered 1" NPT weld bung for the el
 
 ---
 
-## Entry 7 — Triclamp Vessel: Pivot from Copper (2026-04-01, chat: 897332ec)
+## Entry 8 — Triclamp Vessel: Pivot from Copper (2026-04-01, chat: 897332ec)
 
 **Why triclamp:**
 
@@ -255,7 +308,7 @@ Explored 2" copper pipe as tank body with a soldered 1" NPT weld bung for the el
 
 ---
 
-## Entry 8 — DC Power Safety Research: Confirmation of Hard Stop (2026-04-01, chat: 1c02e9c2)
+## Entry 9 — DC Power Safety Research: Confirmation of Hard Stop (2026-04-01, chat: 1c02e9c2)
 
 Follow-up research session confirming the bare wire DC electrolysis conclusion from Entry 4.
 
@@ -270,7 +323,7 @@ Follow-up research session confirming the bare wire DC electrolysis conclusion f
 
 ---
 
-## Entry 9 — Induction Heating Deep Dive (2026-04-06, chat: 3d3a96e3)
+## Entry 10 — Induction Heating Deep Dive (2026-04-06, chat: 3d3a96e3)
 
 Full investigation of induction heating, which had been selected in Entry 2 but not yet explored in depth.
 
@@ -296,7 +349,7 @@ The power electronics complexity (ZVS inverter design, resonant tank tuning, coi
 
 ---
 
-## Entry 10 — Tube Volume and Flow Heating Calculations (2026-04-08, chats: 5383b80a and c6e81b48)
+## Entry 11 — Tube Volume and Flow Heating Calculations (2026-04-08, chats: 5383b80a and c6e81b48)
 
 Supporting sizing calculations:
 
@@ -308,7 +361,7 @@ Supporting sizing calculations:
 
 ---
 
-## Entry 11 — Pressure and Thermal Safety in Triclamp Vessels (2026-04-12, chat: 440924ad)
+## Entry 12 — Pressure and Thermal Safety in Triclamp Vessels (2026-04-12, chat: 440924ad)
 
 Standard EPDM-gasketed triclamp fittings rated ~150 PSI. Water reaches 150 PSI only at ~185°C — not achievable in normal operation. RV water systems typically lack the check valve that creates closed-system thermal expansion problems in residential plumbing; thermal expansion pushes back into the supply line. PRV added as good practice.
 
@@ -318,13 +371,21 @@ At RV supply pressure (~60–80 PSI): well below the 150 PSI EPDM limit. No pres
 
 ---
 
-## Entry 12 — Temperature Control: Snap Disc and ESP32 Thermostat (2026-04-12, chat: f9413753)
+## Entry 13 — Temperature Control: Snap Disc and ESP32 Thermostat (2026-04-12, chat: f9413753)
 
 **Safety cutoff:** Bimetallic snap disc thermostat (NC, opens at 110°F) wired in series with contactor coil signal line. Clamped to copper nipple with thermal paste + self-fusing silicone tape. Hardware-level cutoff, no electronics required.
 
 **ESP32 thermostat with boost mode:** ESP32 + NTC probe (10kΩ @ 25°C, B=3950) + 5V relay module. One button toggles between two hardcoded setpoints (~85°F normal, ~104°F boost). 48V → Pololu D24V10F5 (5V) → ESP32. Relay contacts switch 12V coil signal to EV200.
 
 **PID vs PWM:** PID appropriate for contactor (on/off output with smart timing, accounts for error, rate of change, accumulated error). PWM (fixed frequency, variable duty cycle) appropriate for direct power modulation, not for a contactor. Wide hysteresis essential to avoid rapid cycling (EV200 not rated for high cycle counts).
+
+---
+
+## Entry 14 — Faucet Body Heater: Concept Parked (2026-04-12)
+
+**The concept:** A second heating stage at the point of use — a 2" SS sanitary tube body ~14" long (~840mL), DERNORD 48V/1500W element, Armaflex insulated, mounted vertically under the counter. Control via PIR motion sensor for predictive pre-heating, lever microswitch on faucet handle, NTC thermistor at outlet, and an NC solenoid gate held open only when water is at temperature. The idea was to eliminate any cold-water delay at the faucet and provide a boost stage fed from the upstream triclamp tank.
+
+**Decision:** Parked. The plan now covers a single-stage system: triclamp tank only. The faucet body heater adds significant complexity (additional element, solenoid gate, PIR, lever microswitch, second thermistor loop) before the simpler single-stage system has been built and validated. The concept is preserved here for future consideration once the tank stage is working.
 
 ---
 

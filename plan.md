@@ -10,7 +10,7 @@ For full design history and decision rationale, see `explore.md`.
 
 ## System Architecture
 
-Two-stage point-of-use heating under the counter at the kitchen faucet:
+Point-of-use heating under the counter at the kitchen faucet:
 
 ```
 48V battery
@@ -19,62 +19,47 @@ Two-stage point-of-use heating under the counter at the kitchen faucet:
     │                                                                    │
     │                                                             Triclamp tank (pre-tempered store)
     │                                                                    │
-    │                                                         Faucet body heater (2" SS tube, ~840mL)
-    │                                                                    │
     │                                                              Faucet outlet
     │
     └─── [48V→12V buck] ─── ESP32 + contactor coil + sensors
 ```
 
-**Stage 1 — Under-counter triclamp tank:** pre-tempered water store, heated by DERNORD element, maintained at target temperature. Eliminates cold water purge at faucet.
-
-**Stage 2 — Faucet body heater:** in-line boost at point of use, 2" SS sanitary tube body ~14" long (~840mL), DERNORD element, Armaflex insulated. Activates predictively via PIR; gate held closed until water is ready.
+**Under-counter triclamp tank:** pre-tempered water store, heated by DERNORD element, maintained at target temperature. Eliminates cold water purge at faucet.
 
 ---
 
-## Components
+## 1. Tank — SETTLED
 
-### Heating Elements
-- **DERNORD 48V/1500W**, 1" NPSM thread, U-bend, Incoloy or SS316 sheath
+Custom triclamp stainless vessel (see explore.md Entry 8 for rationale and full BOM):
+
+| Component | Spec |
+|---|---|
+| Vessel body | 2" SS304 triclamp spool tube, ~14" |
+| Element port (right end) | DERNORD 2" TC × 1" FNPT adapter |
+| Left end cap | 2" TC blank ferrule |
+| Inlet (bottom-left) | 2" TC spool with ½" NPT side port, PEX adapter |
+| Outlet (top-right) | 2" TC spool with ½" NPT side port, 3/8" faucet fitting |
+| Temp ports | ½" NPT thermowell in spool side ports |
+| Clamps | 4× 2" hex bolt TC clamps |
+| Gaskets | 4× EPDM (compliant, RV vibration tolerant) |
+| Insulation | 2" foam pipe sleeve + end foam |
+
+**Build task (not a design question):** complete triclamp tank detailed physical assembly.
+
+---
+
+## 2. Heating Element — SETTLED
+
+**DERNORD 48V/1500W**, 1" NPSM thread, U-bend, Incoloy sheath, SS316 preferred (specify on order).
+
 - Cold resistance: ~1.54Ω → 1500W at 48V, ~31A per element
-- Two elements in parallel: ~0.77Ω → ~3000W at 48V (verify measured resistance)
-- Used in both the tank and the faucet body
+- Two elements in parallel: ~0.77Ω → ~3000W at 48V
+- Used in both the triclamp tank and the faucet body heater
+- Incoloy sheath electrically isolates energized conductor from water — eliminates DC electrolysis concern (see explore.md Entries 5 and 9)
 
-### Triclamp Tank (under-counter)
-- Custom vessel: stainless sanitary tube/spool components with triclamp fittings
-- DERNORD element via triclamp port (exact configuration TBD — offline design in progress)
-- Insulated externally; freeze protection via drain valve accessible from outside
-- [photo: chat 990abbdd]
+**Build task:** measure actual cold resistance on delivery; verify sheath is SS316L not SUS304.
 
-### Faucet Body Heater
-- Body: 2" stainless sanitary tube, ~14" long
-- Element: DERNORD 48V/1500W, terminals at bottom
-- Insulation: Armaflex wrap
-- Mounting: vertical, under counter
-- Gate: NC solenoid, held open only when water is at temperature
-
-### Contactors (on hand)
-- **EV200** (Gigavac/Tyco): 12V coil, 48V/500A rated — master safety disconnect; flow switch wired in series with coil circuit so flow stop = hard disconnect regardless of ESP32 state
-- **P115BDA** (12V coil) or **P115FDA** (48V coil): 50A rated — per-element switching; staged power control
-- Both EV200 and P115 have built-in coil suppression — no external flyback diode needed
-
-### Control Electronics
-- **ESP32** dev board (on hand): thermostat logic, PID staging, safety interlocks
-- **5V relay module** (SRD-05VDC-SL-C): low-current signal switching
-- **MOSFET** (IRFP4568 or equiv, TO-247): element power switching — ⚠️ not yet on hand; gate drive needs verification (ESP32 GPIO is 3.3V, Vgs(th) ~4V — may need gate driver IC)
-- **48V→12V buck** (Pololu D24V10F5 or equiv): powers ESP32 + contactor coils
-- **NTC thermistors** (10kΩ @ 25°C, B=3950, M4 probe): inlet and outlet temperature sensing
-- **Flow switch**: activates EV200, triggers ESP32 heating logic
-- **PIR sensor**: predictive pre-heating before faucet use
-- **Lever microswitch**: faucet handle detection
-
-### Temperature Safety
-- Snap disc thermostat (NC, opens at 110°F): hardware-level safety cutoff, wired in series with contactor coil signal
-- Clamped to copper nipple with thermal paste + self-fusing silicone tape
-
----
-
-## Power Staging (with 2× DERNORD elements)
+### Power Staging (with 2× DERNORD elements)
 
 | Elements on | Power | ΔT at 0.5 GPM |
 |---|---|---|
@@ -85,18 +70,41 @@ TMV (thermostatic mixing valve) downstream handles fine temperature control; con
 
 ---
 
-## Open Items
+## 3. Control & Sensing — ACTIVE DESIGN WORK
 
-- [ ] Triclamp tank detailed design (offline, to be documented here)
-- [ ] MOSFET gate drive: confirm ESP32 3.3V GPIO fully enhances IRFP4568, or add gate driver IC
-- [ ] Measure actual DERNORD element resistance (cold and at operating temp)
-- [ ] Confirm DERNORD sheath material suitable for potable water (SS316L preferred over SUS304)
-- [ ] Clarify electrical isolation of sheathed element from water — bonding/grounding requirements
-- [ ] Electrolysis risk assessment at 48V DC with sheathed elements in potable water
-- [ ] Outlet thermistor placement on triclamp tank
-- [ ] Minimum flow threshold for flow switch to avoid dry-fire at dribble flow
-- [ ] Stripboard layout for ESP32 driver circuit (not yet produced)
-- [ ] PID tuning: thermal lag between element power change and outlet thermistor at 0.5 GPM
+### Architecture
+
+```
+48V bus → [ANL fuse 80A] → [EV200 contactor] → [MOSFET IRFP4568] → DERNORD elements
+48V bus → [48V→12V buck] → ESP32 + contactor coil
+Flow switch in series with EV200 coil → hard disconnect on flow stop, independent of ESP32
+NTC thermistors (10kΩ @ 25°C, B=3950, M4 probe) at inlet and outlet
+Snap disc thermostat (NC, opens at 110°F) in series with contactor coil signal — hardware safety cutoff
+```
+
+### Components
+
+| Component | Part | Status |
+|---|---|---|
+| Microcontroller | ESP32 dev board | on hand |
+| Master contactor | EV200 (12V coil, 500A rated) | on hand |
+| Per-element contactor | P115BDA (12V coil, 50A rated) | on hand |
+| Power switch | MOSFET IRFP4568 (TO-247) | **not yet on hand** |
+| Buck converter | Pololu D24V10F5 or equiv (48V→5V) | TBD |
+| Thermistors | NTC 10kΩ @ 25°C, B=3950, M4 probe | TBD |
+| Flow switch | TBD | TBD |
+| PIR sensor | TBD | TBD |
+| Relay module | SRD-05VDC-SL-C (5V) | TBD |
+| Snap disc thermostat | NC, opens at 110°F | TBD |
+| Lever microswitch | faucet handle detection | TBD |
+
+### Open Questions
+
+- [ ] **MOSFET gate drive:** ESP32 GPIO is 3.3V; IRFP4568 Vgs(th) ~4V — confirm whether 3.3V fully enhances, or add gate driver IC
+- [ ] **Outlet thermistor placement:** where to locate on triclamp tank for accurate outlet temp reading
+- [ ] **Minimum flow threshold:** flow switch must activate above dribble flow to prevent dry-fire; identify suitable paddle/flow switch and its threshold
+- [ ] **Stripboard layout:** ESP32 driver circuit not yet produced
+- [ ] **PID tuning:** thermal lag between element power change and outlet thermistor at 0.5 GPM — characterize and tune after build
 
 ---
 
@@ -104,9 +112,11 @@ TMV (thermostatic mixing valve) downstream handles fine temperature control; con
 
 | Decision | Rationale |
 |---|---|
-| Resistive not induction | Simpler electronics; Incoloy sheath provides adequate isolation; see explore.md Entry 2 |
-| 48V direct not 96V boost | Thermal storage (tank) is cheaper and simpler than boost converter; see explore.md Entry 6 |
-| Triclamp tank not RTEX vessel | RTEX copper tubes ~1¼" diameter — too little water volume; see explore.md Entry 6 |
-| Triclamp tank not Fogatti drop-in | Custom triclamp vessel better fits under-counter two-stage architecture |
+| Resistive not induction | Simpler electronics; Incoloy sheath provides adequate isolation; see explore.md Entry 10 |
+| Sheathed not bare wire | DC electrolysis drives toxic ion dissolution from bare nichrome; sheath eliminates concern; see explore.md Entries 5 and 9 |
+| 48V direct not 96V boost | Thermal storage (tank) is cheaper and simpler than boost converter; see explore.md Entry 4 |
+| Triclamp SS not copper pipe | Lower standby heat loss; no soldering; fully disassemblable; see explore.md Entry 8 |
+| Triclamp tank not RTEX vessel | RTEX copper tubes ~1¼" diameter — too little water volume; see explore.md Entry 4 |
+| Triclamp tank not Fogatti drop-in | Custom triclamp vessel better fits under-counter two-stage architecture; see explore.md Entry 6 |
 | No propane water heating | Propane generator (if needed) charges 48V battery; single DC path serves all heating |
 | Staged contactors not PWM | Resistive load; binary staging + downstream TMV is simpler and avoids contactor cycle wear |
