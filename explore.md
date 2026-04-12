@@ -381,6 +381,12 @@ At RV supply pressure (~60–80 PSI): well below the 150 PSI EPDM limit. No pres
 
 ---
 
+## Entry 16 — TMV Removed (2026-04-12)
+
+TMV (thermostatic mixing valve) was specified in Entry 2 for scald protection (hard cap at 49°C/120°F) and fine temperature control. With max setpoint now fixed at ~104°F (~40°C) — well below the 49°C scald threshold — there is no scald risk and no need for downstream mixing. Removed from design.
+
+---
+
 ## Entry 15 — Control Simplification: Thermostat Not FET/PWM (2026-04-12)
 
 **What was considered:** MOSFET (IRFP4568, TO-247) in the 48V power path for fine power control — either PWM duty-cycle modulation of element power or as a solid-state switch driven by ESP32 GPIO. Raised an immediate problem: ESP32 GPIO outputs 3.3V; IRFP4568 Vgs(th) is ~4V, so the gate would not fully enhance without a gate driver IC. This added a component and a design question.

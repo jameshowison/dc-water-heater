@@ -65,7 +65,6 @@ Custom triclamp stainless vessel (see explore.md Entry 8 for rationale and full 
 | 1 | 1,500W | +41°F |
 | 2 | 3,000W | +82°F |
 
-TMV (thermostatic mixing valve) downstream handles fine temperature control; contactors handle power steps. TMV essential when running both elements.
 
 ---
 
