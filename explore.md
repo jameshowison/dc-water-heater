@@ -464,17 +464,37 @@ Full review of plan.md against the design history in explore.md. Items identifie
 
 ---
 
-## Entry 20 — SS304 vs SS316L for Potable Water Contact (open)
+## Entry 20 — SS304 vs SS316L for Potable Water Contact (resolved)
 
 The triclamp vessel BOM currently specifies SS304 for the vessel body, and the DERNORD element sheath material is unconfirmed (likely SUS304). For drinking/cooking water contact, the relevant distinction:
 
 - **SS304 (18-8):** standard food-grade stainless; widely used in brewing and food processing; fine for water contact in most conditions
 - **SS316L (18-10-2 with molybdenum):** higher corrosion resistance, especially against chlorides. Preferred in marine and drinking water applications. The "L" (low-carbon) variant reduces sensitization risk from welding.
 
-**Questions to resolve:**
-- Are the DERNORD triclamp adapters and spool pieces available in 316L from the usual suppliers (McMaster, Glacier Tanks, Beduan)?
-- What grade is the DERNORD element Incoloy sheath? (Incoloy 800/825 is a nickel-iron-chromium alloy — not stainless — and is inherently corrosion-resistant; if the sheath is Incoloy, the 304 vs 316L question applies to the vessel body only, not the element)
-- Given RV use (intermittent, not continuous high-chloride exposure), is 304 acceptable in practice, or does the low incremental cost of 316L parts justify the upgrade?
+**Findings (2026-04-12):**
+
+**DERNORD element sheath:** The product page describes the element as "stainless steel surface, electropolished" — likely generic marketing copy. Industry standard for DC/solar immersion heaters is Incoloy 800/825 sheath. Not worth confirming: given that water is used for hands and dishes only (no ingestion), sheath material is immaterial to safety.
+
+**316L spool availability:** SS316L triclamp spools are available from multiple suppliers at modest premium over SS304:
+- **[Sanitary Fittings](https://sanitaryfittings.us/product/tri-clamp-sanitary-spool):** both 304 and 316L; 2" 316L spool ~$160–165 for 12" (vs ~$150–155 for 304)
+- **[GVC Direct](https://www.gvc.net/p/4203/316l-ss-sanitary-tri-clamp-spool-pieces):** 316L SS triclamp spools, 2" available, ~$135.80 base + $2.38/ft
+- **[Glacier Tanks](https://www.glaciertanks.com/fittings/stainless-steel-316-fittings/tri-clamp-fittings/spools.html):** SS316 triclamp spools available in 2"
+- DERNORD's own spool (dernord.com) is SS304 only
+
+**TC × 1" FNPT adapter (element port):** DERNORD's adapter is SS304 only. Upgrading this to 316L requires sourcing from Sanitary Fittings or GVC Direct. This fitting has water contact on the inside (element insertion point) so it matters.
+
+**Conclusion — SS304 DERNORD parts are acceptable; 316L is not a safety requirement:**
+
+On further review, the concern is overstated for this application:
+
+- SS304 is food-grade stainless, standard in brew kettles, dairy equipment, kitchen sinks, and restaurant equipment that contact potable water daily. No health risk at these temperatures.
+- The Delta T warning ("304 corrodes in water") specifically applies to **heating element sheaths** at high watt density (high surface temperature) — not to vessel bodies sitting at 80–104°F.
+- SS304 corrosion in low-chloride fresh municipal water at these temperatures occurs over years and manifests as pitting affecting longevity, not as harmful metal leaching into drinking water.
+- RV use is intermittent, not continuous; feed water is typical municipal supply, not marine or brackish.
+- This water is used for handwashing and dishes only — not consumed directly. No ingestion pathway; skin contact with any trace dissolved metals at realistic SS304 leaching rates is a non-issue.
+- 316L parts are available from Sanitary Fittings and GVC Direct at modest premium (~$10–20 per fitting) if longevity is a concern in the future, but this is not a procurement blocker.
+
+**BOM unchanged — SS304 DERNORD parts already on hand are fine.**
 
 **Note:** The snap disc and NTC thermistor are surface-mounted on external copper nipples — no direct water contact with those sensors.
 
