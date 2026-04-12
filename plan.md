@@ -65,13 +65,14 @@ Custom triclamp stainless vessel (see explore.md Entry 8 for rationale and full 
 | Left end cap | 2" TC blank ferrule |
 | Inlet (bottom-left) | 2" TC spool with ½" NPT side port, PEX adapter |
 | Outlet (top-right) | 2" TC spool with ½" NPT side port, 3/8" faucet fitting |
-| Temp ports | ½" NPT thermowell in spool side ports |
+| Sensor nipples | ½" NPT × ~1" copper nipple on inlet and outlet side ports — surface-mount point for NTC thermistor and snap disc |
 | Clamps | 4× 2" hex bolt TC clamps |
 | Gaskets | 4× EPDM (compliant, RV vibration tolerant) |
 | Insulation | 2" foam pipe sleeve + end foam |
 
 **Build tasks (not design questions):**
 - Complete triclamp tank detailed physical assembly
+- Fit copper nipples in inlet and outlet side ports; surface-mount NTC thermistor on outlet nipple and snap disc on outlet nipple, both with thermal paste + self-fusing silicone tape
 - Insulate supply pipes between new under-counter triclamp tank and the old Suburban tank — uninsulated pipes are a standby heat loss path
 
 ---
@@ -98,7 +99,25 @@ This is ordered, but currently have a 1000W dernord element with same thread.
 
 ---
 
-## 3. Control & Sensing — ACTIVE DESIGN WORK
+## 3. Cabling — SETTLED
+
+**Supply run:** Victron distribution bar → ANL fuse → P115 contactor(s) → DERNORD element(s). Distance from Victron bar to the heating circuit is ~2 ft.
+
+At 2 ft, voltage drop is negligible regardless of gauge (62A × ~1 mΩ round-trip ≈ 0.06V). Wire sizing is current-capacity driven, not drop-driven.
+
+| Segment | Max current | Recommended gauge | Notes |
+|---|---|---|---|
+| Victron bar → ANL fuse | 62A (both elements) | 4 AWG fine-stranded | Marine/welding grade; ≤18" from battery terminal to fuse |
+| ANL fuse → P115 contactors (trunk) | 62A | 4 AWG | Trunk before split |
+| P115 → each DERNORD element | 31A | 8 AWG | One run per element/contactor |
+
+Fine-stranded welding cable or marine-grade tinned copper preferred for RV flex/vibration tolerance. Lugs crimped and heat-shrunk; no set-screw terminals in the power path.
+
+**Control wiring** (12V coil signal, ESP32 GPIO) is low-current and can run 22–18 AWG.
+
+---
+
+## 4. Control & Sensing — ACTIVE DESIGN WORK
 
 ### Architecture
 
@@ -120,17 +139,22 @@ One P115 contactor per element; 1 or 2 elements fitted depending on heating rate
 |---|---|---|
 | Microcontroller | ESP32 dev board | on hand |
 | Contactor (one per element) | P115BDA (12V coil, 50A rated) | on hand |
-| Buck converter | Pololu D24V10F5 or equiv (48V→5V) | TBD |
+| Buck converter | 48V→12V, ≥58V input rating (e.g. Pololu D57V45F12 or equiv) | TBD |
 | Thermistor | NTC 10kΩ @ 25°C, B=3950, M4 probe | TBD |
-| Relay module | SRD-05VDC-SL-C (5V) | TBD |
+| Relay module | SRD-12VDC-SL-C module board (12V coil, transistor driver — signal from ESP32 GPIO) | TBD |
 | Snap disc thermostat | NC, opens at 110°F | TBD |
 
 ### Open Questions
 
-- [ ] **Water level / dry-fire protection:** tank is normally always full (pressurized system), but confirm whether a low-water sensor is needed; options include a float switch or level probe wired in series with the contactor coil signal
-- [ ] **Outlet thermistor placement:** where to locate on triclamp tank for accurate outlet temp reading
-- [ ] **Stripboard layout:** ESP32 driver circuit not yet produced
+- [ ] **Water level / dry-fire protection:** tank is normally always full (pressurized system), but a slow leak or backflow scenario could leave the tank partially empty with the element exposed. Explore: (a) whether a float switch or level probe wired in series with the contactor coil signal is practical in a 2" triclamp vessel; (b) whether the snap disc alone provides adequate protection if the element runs dry (element surface temp would spike, snap disc should trip — confirm snap disc placement and response speed are sufficient for this failure mode); (c) any other passive indicators of low-water condition.
+- [x] **Outlet thermistor placement:** resolved — NTC surface-mounted on copper outlet nipple with thermal paste and self-fusing silicone tape (see Sensor nipples in BOM above)
+- [ ] **Stripboard layout:** decide whether to build ESP32 driver circuit on stripboard now or breadboard for initial testing; not a design question, a build sequencing decision
 - [ ] **Hysteresis band:** characterize thermal lag at outlet thermistor vs element on/off at 0.5 GPM; set deadband wide enough to prevent rapid contactor cycling
+- [ ] **Relay module active-high vs active-low:** SRD-12VDC-SL-C modules vary — some are active-low (GPIO low = relay energized), some active-high. At power-up, before the ESP32 boots and firmware takes over, the signal line floats or defaults low depending on the board. If the module is active-low and the signal line floats low, the relay closes and the P115 coil is energized briefly — heating element on before firmware runs. Confirm the specific module's default input state and whether it is safe at boot. Prefer a module that defaults to relay-off (contacts open, element disconnected) before firmware asserts control.
+- [ ] **PRV (pressure relief valve):** Entry 12 flags PRV as good practice for thermal expansion. The Suburban tank is staying plumbed in (triclamp is an additional under-counter stage, not a replacement). Explore: (a) whether the Suburban's existing PRV already covers the triclamp vessel — likely yes if both share the common supply line with no isolation valve between them; (b) if a dedicated PRV is needed, where it would drain (under-counter drain pan? existing Suburban drain line?); (c) whether the open RV system makes thermal expansion a non-issue in normal operation, leaving only the both-valves-closed edge case to design for.
+- [ ] **SS304 vs SS316L for potable water:** vessel body currently specified as SS304; DERNORD element sheath material unconfirmed. For potable water contact 316L is preferred — confirm whether triclamp fittings and element sheath are available in 316L and update BOM. See explore.md for background.
+- [ ] **Winterization / blowout:** the DERNORD element enters from the right end cap and is the lowest point in the tank. A compressed-air blowout from the inlet port should clear the main tank body, but water pooled at and around the element base may not fully evacuate. Confirm whether residual water at the element poses freeze damage risk, and whether a drain port or specific blowout procedure is needed (e.g. blow from outlet, drain from inlet, or accept a small residual volume).
+- [ ] **ESP32 firmware (future task, park until hardware assembled):** thermostat logic, NTC Steinhart-Hart ADC conversion, hysteresis band, three-state button (off / maintain ~80°F / boost ~104°F), relay drive, watchdog timer. Off mode: relay de-energized, element off, tank cools to ambient — no target temperature maintained.
 
 ---
 

@@ -417,4 +417,67 @@ TMV (thermostatic mixing valve) was specified in Entry 2 for scald protection (h
 
 ---
 
+## Entry 18 — Control Power Supply: 48V→12V Architecture (2026-04-12)
+
+**Decision:** Single 48V→12V buck converter powers both the ESP32 and the P115 contactor coils. No separate 5V supply needed.
+
+**Rationale:**
+
+- P115BDA coil is 12V — 12V rail drives the coils directly (via relay module).
+- Most ESP32 dev boards accept 7–12V on the VIN pin through their onboard regulator chain (12V → 5V → 3.3V). Dissipates ~1–2W as heat; manageable. Confirm against specific board.
+- Relay module voltage changed from 5V (SRD-05VDC-SL-C) to 12V (SRD-12VDC-SL-C) to match the single 12V rail.
+
+**Relay module and GPIO drive:**
+
+The bare SRD-12VDC-SL-C relay coil draws ~70–90mA — too much for direct ESP32 GPIO drive (safe limit ~12mA). The relay MODULE board solves this: it includes an NPN transistor and base resistor; ESP32 GPIO sinks a few mA into the transistor base, which then drives the 12V coil from the supply rail. Signal input threshold is 2–3V, so 3.3V GPIO works cleanly. Buy the module board, not the bare relay.
+
+**Noise:**
+
+Sharing a supply between the ESP32 and contactor coils is acceptable here. P115 has built-in coil suppression (Entry 4). The relay module transistor stage means ESP32 GPIO only switches the low-current relay coil, not the P115 coil directly — two-stage isolation keeps the ESP32 clean. A 100µF cap on the 12V rail near the ESP32 is the first mitigation if glitches appear in testing. Separate supplies not needed for this application.
+
+**Buck converter input voltage:**
+
+Must be rated for full-charge battery voltage, not nominal 48V. A 16S LiFePO4 bank charges to ~58V. Pololu D36V6Fx parts (36V max) and D50V50Fx parts (50V max) are insufficient or marginal. Pololu D57V45F12 (57V max input, 12V output) is the right size class. Confirm input ceiling against actual battery spec before ordering.
+
+---
+
+## Entry 19 — Plan Review and Gap Analysis (2026-04-12)
+
+Full review of plan.md against the design history in explore.md. Items identified and resolved or added as open tasks:
+
+**Resolved in this session:**
+
+- **Outlet thermistor placement:** decided to surface-mount NTC on copper outlet nipple rather than use a thermowell. Thermowell removed from BOM. Copper nipples (½" NPT × ~1") added to inlet and outlet side ports as mounting points for both the NTC thermistor and the snap disc — this also solves the snap disc mounting question from Entry 13 (snap disc needs a copper surface; the copper nipple provides it).
+
+- **Cabling:** documented wire gauge for the ~2ft run from the Victron distribution bar. At 2ft, voltage drop is negligible (62A × ~1mΩ ≈ 0.06V); sizing is purely current-capacity driven. Trunk (Victron bar → ANL fuse → P115 split): 4 AWG at 62A. Per-element legs (P115 → DERNORD): 8 AWG at 31A. Fine-stranded welding cable or tinned marine copper; crimped lugs; no set-screw terminals in the power path.
+
+- **Plumbing topology / Suburban:** confirmed the Suburban tank stays plumbed in. The triclamp is an additional under-counter stage, not a replacement. This bearing on the PRV question — the Suburban's existing PRV likely already covers the triclamp if no isolation valve separates them.
+
+- **Three-state button / off mode:** off mode means relay de-energized, element off, tank cools to ambient. No target temperature is maintained in off mode. Two active setpoints: maintain ~80°F and boost ~104°F.
+
+**Added as open tasks:**
+
+- **SS304 vs SS316L:** vessel body is SS304; element sheath unconfirmed. 316L preferred for potable water contact. See Entry 20 for background.
+- **Winterization / blowout:** element enters from the right end cap and sits at the lowest point of the tank. Main body should blow clear, but water pooled at the element base may not evacuate. Needs a confirmed procedure or drain port.
+- **Stripboard vs breadboard:** build sequencing decision, not a design question. Park until tank and power circuit are assembled.
+- **ESP32 firmware:** parked until hardware is assembled and tested.
+
+---
+
+## Entry 20 — SS304 vs SS316L for Potable Water Contact (open)
+
+The triclamp vessel BOM currently specifies SS304 for the vessel body, and the DERNORD element sheath material is unconfirmed (likely SUS304). For drinking/cooking water contact, the relevant distinction:
+
+- **SS304 (18-8):** standard food-grade stainless; widely used in brewing and food processing; fine for water contact in most conditions
+- **SS316L (18-10-2 with molybdenum):** higher corrosion resistance, especially against chlorides. Preferred in marine and drinking water applications. The "L" (low-carbon) variant reduces sensitization risk from welding.
+
+**Questions to resolve:**
+- Are the DERNORD triclamp adapters and spool pieces available in 316L from the usual suppliers (McMaster, Glacier Tanks, Beduan)?
+- What grade is the DERNORD element Incoloy sheath? (Incoloy 800/825 is a nickel-iron-chromium alloy — not stainless — and is inherently corrosion-resistant; if the sheath is Incoloy, the 304 vs 316L question applies to the vessel body only, not the element)
+- Given RV use (intermittent, not continuous high-chloride exposure), is 304 acceptable in practice, or does the low incremental cost of 316L parts justify the upgrade?
+
+**Note:** The snap disc and NTC thermistor are surface-mounted on external copper nipples — no direct water contact with those sensors.
+
+---
+
 *Journal continues as design progresses. See `plan.md` for current state.*
