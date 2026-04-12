@@ -1,272 +1,330 @@
 # DC Water Heater — Exploration Journal
 
-This journal records the design explorations for a 48V DC water heating system in an RV. Entries are in chronological order. See `plan.md` for current status.
+This journal records the design explorations for a 48V DC water heating system in an RV, in chronological order. See `plan.md` for current status.
+
+**RV power system context (fixed throughout):** 48V, 192Ah LiFePO4 battery bank, 200A continuous delivery.
 
 ---
 
-## Entry 1 — RV Water System Constraints (early context)
+## Entry 1 — Problem Statement and Initial Requirements (background context)
 
-**Problem statement:** The existing RV water heater is a Suburban propane/electric combo tank. Core problems identified:
+The existing RV water heater is a Suburban propane/electric combo tank. Core problems identified:
 
-- Heating a full tank is too power-hungry relative to the small water draws needed (dish washing, hand washing)
-- The propane burner design uses a flue tube running through the center of the tank — this acts as a chimney when the burner is off, causing significant standby heat loss
+- Heating a full tank wastes energy relative to the small water draws needed for dish washing and hand washing
+- The propane burner uses a flue tube running through the center of the tank — this acts as a chimney when the burner is off, causing significant standby heat loss. The flue is an anti-thermos.
 - Tanks need protection against corrosion (anode rod management) and require draining for freeze protection
-- Hot water sitting in pipes between the tank and the faucet is wasted on each draw
+- Hot water sitting in pipes between the tank and the faucet is wasted (cold water purge before hot arrives)
 
-**Initial requirements:**
-- Power source: existing 48V 192Ah RV battery system (can deliver 200A continuous)
-- Avoid propane entirely if possible
-- Handle low-flow faucet use efficiently
-- Freeze-safe design
+**Initial goal:** Replace the propane/electric system with a 48V DC system powered by the existing RV battery, optimized for low-flow faucet use.
 
 ---
 
-## Entry 2 — Induction Heating Explored (chat: 3d3a96e3)
+## Entry 2 — Faucet Heater Concept, Flow Geometries, and Tank Buffer (2026-03-21, chat: 7fb9973b)
 
-Investigated induction heating as the primary heating mechanism, motivated by the desire for zero galvanic contact between the 48V supply and the water.
+First serious design session. Focused on a point-of-use faucet heater fed from a 48V DC source.
 
-**How it works:** AC current through a coil induces eddy currents in a conductive pipe section (carbon steel or 304SS), which self-heats resistively. The coil itself is not in contact with water.
+**Power requirement at real flow rates:**
 
-**First-principles calculation at 0.5 GPM:**
-- ΔT target: 25°C → requires ~52W (very modest)
-- Skin depth determines how deep current penetrates; higher frequency = shallower
+Early confusion between 0.5 g/s (a drip) and 0.5 GPM (a real faucet). Corrected numbers:
+- Flow: 1.5 GPM = 95 ml/s
+- ΔT = 35°C (cold inlet to usable temperature)
+- Power needed: ~14,000W
 
-**Solenoid vs pancake coil:**
+This is why commercial under-sink units are 7–18kW.
 
-Solenoid (coil wraps around tube) was compared against a pancake (flat coil over a perforated disc):
+**Heating element options evaluated:**
+- Resistive sheathed (Incoloy): simplest, but 48V DC in water contact raises shock/electrolysis concern
+- PTC ceramic: self-limiting temperature, no thermostat needed, isolated if potted — but 48V DC rated at 5kW hard to source
+- Induction: zero galvanic contact with water, no element corrosion — adds DC→AC inverter stage
+- **Initial selection: induction** (see Entry 5 for full induction exploration, subsequently rejected)
 
-- Pancake at 1500W+ requires a disc >100mm diameter to avoid local boiling — defeats compact inline goal
-- Solenoid over a 40mm tube gives ~50cm² active area along its length — much more forgiving heat flux
-- Pancake feasible at low power (the original 52W concept) but not at shower-scale
+**Flow geometry analysis:**
 
-**ZVS resonant inverter:** From 48V DC, a resonant LLC or series-resonant inverter (ZVS topology) drives the coil at 20–100kHz. Efficiency ~90–95%. At 3000W input the coil carries 150–300A peak AC, requiring 8–10mm OD copper tube and active water cooling of the coil.
+Three geometries evaluated:
 
-**Two-unit vs single-unit at 3000W:**
-- Single 3000W coil: coil current doubles, copper sizing becomes critical, active coil cooling needed
-- Two 1500W units: each coil carries half the current, 6mm copper tube air-cooled is sufficient
+- *Single-pass straight tube:* simple, cheap, hot spots where element is hottest, scaling concentrates there
+- *Coiled tube:* longer water path, more contact time, better turbulence, harder to drain
+- *Multi-pass / U-tube or helical:* most efficient heat transfer, highest pressure drop, hardest to drain
 
-**Why induction was not pursued further:**
+Key insight: freeze drainability vs heat transfer efficiency are in direct opposition. Initially prioritized drainability for RV use — then confirmed that compressed air blow-out makes drainability a non-constraint, freeing design to optimize for heat transfer.
 
-The power electronics complexity (ZVS inverter design, resonant tank tuning, coil winding) is significant. The galvanic isolation benefit can be achieved more simply with a sheathed resistive element (Incoloy sheath isolates the conductor from water). The induction path was set aside in favor of resistive heating — documented here to avoid re-exploring without strong new justification.
+With drainability removed: **helical/coiled geometry wins.** At low flow rates (laminar regime), coiled geometry induces **Dean vortices** — secondary flow patterns that continuously mix hot wall water with cool center water, dramatically improving wall-to-water heat transfer without increasing pressure drop.
 
----
+**Element surface temperature analysis:**
 
-## Entry 3 — Pressure and Thermal Safety in Triclamp Vessels (chat: 440924ad)
+At 5kW with a typical element surface area of ~0.02m²:
+- Heat flux q ≈ 250,000 W/m²
+- With Dean-vortex-enhanced convection: element surface ~71°F above local water temp
+- At outlet (136°F water): element surface ~207°F — approaching boiling, risky at low flow
 
-Investigated whether a triclamp spool could serve as a water vessel and what thermal/pressure risks apply.
+Conclusion: 5kW into a small coil is aggressive. Either lower watt density (larger element surface) or ensure flow never drops below ~1 L/min while energized.
 
-**Key findings:**
+**Tank-as-buffer decision:**
 
-- Standard EPDM-gasketed triclamp fittings: rated ~150 PSI
-- Water reaches 150 PSI at ~185°C (365°F) — only reachable in a sealed, heated-under-pressure scenario
-- Normal boiling (100°C) in a vented spool: no risk
-- **Thermal expansion risk in sealed vessels:** if both inlet and outlet valves are closed and the vessel is heated, even modest temperature rise (20°C → 60°C) in an incompressible fluid can spike hundreds of PSI with no room to expand
-- RV water systems typically lack the check valve that creates closed-system problems in residential plumbing — thermal expansion pushes back into the supply line
-- A PRV (pressure relief valve) is good practice regardless
+A larger diameter pipe section (~1.5L) as a small thermal buffer simultaneously:
+- Reduces watt density (same element, more water volume, lower surface temp)
+- Provides thermal mass for burst demand
+- Makes behavior more forgiving at low flow
 
-**48V 1500W element as thermostat:** Briefly explored whether pressure rise from heating could actuate a switch — not pursued.
+**TMV (thermostatic mixing valve):**
 
----
+At high outlet temperatures, scald risk is real. A TMV with a hard cap at 49°C specified — Honeywell AM101 or Watts LF1170, ~$35–40. This also simplifies control: ESP32 just manages flow switch; TMV handles fine temperature.
 
-## Entry 4 — Tube Volume and Flow Heating Calculations (chats: 5383b80a, c6e81b48)
-
-Supporting calculations establishing sizing context.
-
-**2" sanitary tube, 8" long:**
-- Bore volume: ~360 mL (≈ 21.96 in³)
-- At 0.5 GPM flow: residence time ~11.4 seconds
-- Time to heat 360mL by 35°F at 1500W: ~19.5 seconds
-- Conclusion: flow-through heating of a 2" tube at 0.5 GPM and 1500W is marginal — the water barely has time to heat
-
-**3" sanitary tube, 8" long:**
-- Bore volume: ~847 mL
-
-**1¼" brass pipe, 8" long (two pipes):**
-- Liquid volume: ~337 mL total
-- Wall metal volume: ~170 mL equivalent
-
-These calculations informed the decision that a flow-through tankless design requires either very high power or very low flow rates to achieve meaningful ΔT. Storing thermal mass (a small tank) is more practical than pure flow-through.
+**Status at end of session:** Induction selected pending deeper investigation. Tank-as-buffer architecture established. TMV specified. Flow geometries resolved.
 
 ---
 
-## Entry 5 — Temperature Control: Snap Disc and ESP32 Thermostat (chat: f9413753)
+## Entry 3 — DC Tankless Heater: Elex Teardown and Rheem Vessel Strategy (2026-03-23, chat: baaf5cff)
 
-Investigated temperature cutoff and control options for the 48V heating element.
+**Elex 5.5 kW unit:**
 
-**Safety cutoff:**
-- Goal: cut power to EV200 contactor coil at 110°F water temp
-- Bimetallic snap disc thermostat (NC, opens at 110°F) wired in series with coil signal — simplest approach, no electronics
-- Mounting: clamp or strap to copper nipple with thermal paste; self-fusing silicone tape to secure
-- Triclamp-compatible temperature switch exists (NPT process side) but requires adapter
+The Elex 5.5 uses bare nichrome coils floating in water-filled copper bores (11mm ID bore, coil OD ~8.3mm, coil ID 7.5mm, wire ~0.4mm diameter, openly wound at ~4.25mm pitch). Water flows inside and outside the coil — good heat transfer geometry. Elements terminate through ceramic bead insulators into screw terminals.
 
-**Control thermostat:**
-- Desired feature: one-button toggle between normal setpoint (~85°F) and boost setpoint (~104°F)
-- ITC-308 has two setpoints but not a clean boost button
-- **Selected approach:** ESP32 + NTC probe + relay. One button toggles between two hardcoded temperatures. Simple code, $5 in parts.
+Resistance of each element: ~8.7Ω. At 48V: 48²/8.7 = **265W per element** — far too low.
 
-**Control electronics stack:**
-- 48V bus → Pololu D24V10F5 (48V→5V regulator) → ESP32
-- ESP32 GPIO → 5V single-channel relay module (SRD-05VDC-SL-C based)
-- Relay contacts switch 12V coil signal to EV200 (contacts rated 30VDC/10A — trivial load)
-- **PID vs PWM:** PID calculates output based on error, rate of change, and accumulated error — appropriate for a contactor (on/off output with smart timing). PWM varies duty cycle at fixed frequency — appropriate for direct power modulation, not for a contactor.
-- Wide hysteresis needed to avoid rapid contactor cycling (EV200 not rated for high cycle counts)
+**Rewind analysis:**
 
----
+To hit 1.9kW per element at 48V: need R = 1.21Ω. With bore length 170mm and coil ID 7.5mm, 18 AWG (1.02mm) nichrome 80 wire fits and gives the right resistance. Two coils in parallel: ~0.77Ω → ~3000W at 48V. Physically feasible. [photo: chat baaf5cff]
 
-## Entry 6 — DC Tankless Heater: Rheem Vessel Strategy (chat: baaf5cff)
+**Borked Rheem RTEX strategy:**
 
-Explored using a commercial tankless water heater vessel as the heating chamber.
+Rheem RTEX units (18kW, 240VAC) fail via board death, leaving copper vessel intact. Dead units on Marketplace for $30–50. DERNORD 48V/1500W uses the same **1" NPSM thread** as the HE90240 stock element — confirmed drop-in compatible (NPSM is straight-thread, seals via face gasket, compatible with NPT female fittings). At 48V per DERNORD: 1500W, 31A.
 
-**The borked Rheem RTEX strategy:**
-
-Rheem RTEX-18 (18kW, 240VAC) has a well-known failure mode: control board dies, copper vessel and elements survive. Dead units appear on Facebook Marketplace/Craigslist for $30–50.
-
-- RTEX-13/18: 2 copper flow tubes, manifolds, flow switch, thermistors, thermal cut-off
-- RTEX-27: 3 tubes — more interesting for staged power control
-
-**Element compatibility:**
-- Existing elements: HE90240, 9kW/240V, 1" NPSM thread, ~6.4Ω
-- At 48V: 48²/6.4 = 360W — too low as-is
-- **DERNORD 48V/1500W element:** 1" NPSM thread (confirmed compatible), ~1.54Ω, delivers 1500W at 48V
-- Drop-in replacement: pull HE90240, install DERNORD, rewire to ESP32 + MOSFET
+RTEX models: 13kW (2 tubes), 18kW (2 tubes), 27kW (3 tubes). 3× DERNORD 1500W in RTEX-27 = 4500W staged.
 
 **Multi-leg contactor architecture:**
 
-With 3× DERNORD at 48V (one per tube, one contactor per element):
-- Each contactor switches 31A — P115 at 62% of 50A rating, comfortable
-- Staged power: 1.5kW / 3.0kW / 4.5kW
-- At 0.5 GPM: 1.5kW → +41°F, 3kW → +82°F, 4.5kW → +123°F (TMV needed above 1 element)
-- ESP32 staging logic: flow detected → element 1 on → if below target → element 2 → etc.
-- TMV (thermostatic mixing valve) handles fine temperature control; contactors handle power steps
+One P115 contactor per element at 31A = 62% of 50A rating. Staged power: 1500W / 3000W / 4500W. TMV handles fine temperature; contactors handle power steps. Both EV200 and P115 have built-in coil suppression — no external flyback diode needed.
 
-**Contactor selection:**
-- EV200 (Gigavac/Tyco): 12V coil variant, 48V/500A rated, fast (10ms), built-in coil suppression — no external flyback diode needed
-- P115BDA (12V coil) / P115FDA (48V coil): 50A rated, quieter than EV200, also have built-in suppression
-- P115FDA/BDA: FDA = 48V coil, BDA = 12V coil (needs small buck converter but more available used)
-- **On hand:** EV200 and P115 contactors
+**Contactor options:**
+
+| Contactor | Coil | Rated | Notes |
+|---|---|---|---|
+| EV200 | 12V | 48V/500A | Fast, built-in suppression, loud |
+| P115BDA | 12V | 50A | Quieter, built-in suppression, common used |
+| P115FDA | 48V | 50A | Same but 48V coil, less common used |
 
 **96V boost path explored and rejected:**
 
-To use commercial 240VAC tankless heaters from a 48V bus, a 48V→240VDC boost converter was considered. Rejected: the ease and cost-effectiveness of storing heat in water (thermal mass) makes the boost converter complexity unjustifiable. A well-designed insulated tank outperforms the tankless approach for RV use patterns.
+To run stock 240VAC elements from 48V bus, boost converters were investigated. At 8.8kW: input ~183A from 48V bus; boost converter ~$300–500. **Rejected:** thermal storage (tank) is cheaper and simpler. A well-insulated tank outperforms tankless for RV use patterns.
 
-**Nichrome rewind explored:**
+**Corrosion analysis for copper vessel:**
 
-Investigated rewinding the HE90240 element with nichrome 80 wire to target 1.54Ω at 48V.
-- Target wire: 18 AWG nichrome 80 (1.02mm), ~1.346 Ω/m
-- Two coils of ~1.977m each in parallel → ~1.33Ω → 1,734W at 48V
-- Feasible but custom elements from Tempco/OEM Heaters (~$40–60) are more practical
+- Galvanic: stainless sheath (anode) in copper pipe (cathode) — mild with clean water; mitigated by dielectric union on inlet/outlet
+- DC leakage from sheath to water: test sheath-to-terminal resistance periodically; should read infinite
+- Scale: periodic citric acid flush
+- No anode rod needed — no steel in the system
 
 **RTEX vessel outcome:**
 
-Physical test revealed the RTEX copper flow tubes are much smaller than expected (~1¼" diameter). This gives too little water volume per tube — insufficient thermal mass for the RV use case. The RTEX vessel strategy was abandoned. [photo: chat baaf5cff]
+Physical inspection revealed RTEX copper flow tubes are ~1¼" diameter — too small, insufficient water volume. RTEX vessel strategy **abandoned**. [photo: chat baaf5cff]
+
+**Status at end of session:** Rheem vessel path closed. DERNORD 1500W element confirmed as correct part. Multi-leg contactor architecture established. 96V boost rejected. Rewind path still open pending electrolysis investigation.
 
 ---
 
-## Entry 7 — Faucet-Integrated Heater Concept (chat: 7fb9973b)
+## Entry 4 — DC Electrolysis Safety, Rewind Hard Stop, and Control Circuit BoM (2026-03-24, chat: 335e1db9)
 
-Stepped back to reframe the problem. Core issues restated:
+**Nichrome rewind risks:**
 
-- Heating a full 6-gallon tank for small faucet draws wastes energy
-- Water sitting in pipes between tank and faucet is wasted (cold water purge before hot arrives)
-- The existing propane/electric Suburban tank has inherently poor insulation (flue chimney effect)
+While investigating rewinding the Elex nichrome, bare-wire-in-water under DC was explicitly questioned for drinking water use.
 
-**Design direction:** point-of-use heating at the faucet, with a pre-tempered supply from an upstream tank. Eliminates cold water purge, reduces tank heating load.
+Key findings:
+- AC self-cancels electrolysis effects each half-cycle; DC applies constant polarity → sustained electrolysis
+- Nichrome 80 forms a chromium oxide passive layer offering some protection, but DC continuously attacks it
+- Every 10°F temperature rise doubles corrosion rate
+- **For drinking water / dishwashing: hard stop.** Nickel and chromium ions are toxic at elevated concentrations. DC will continuously drive dissolution regardless of oxide layer.
 
-**Heating element selection for faucet body:**
+The Elex 5.5 bare nichrome bore geometry is also incompatible with a sheathed element — bores are too narrow. Elex rewind path **closed**.
 
-Options evaluated:
-- Resistive (sheathed element): simplest, well-understood, but 48V DC in water contact raises shock concern
-- PTC (positive temperature coefficient ceramic): self-limiting temperature, no thermostat required, electrically isolated if potted — but 48V DC rated PTC elements at 5kW are non-trivial to source
-- Induction: zero galvanic contact with water, no element corrosion, fast response — adds DC→AC inverter stage (see Entry 2)
-- **Selected: induction initially, then revised to sheathed resistive** — Incoloy sheath provides adequate isolation, simpler electronics
+**Pivot to sheathed elements:** Incoloy sheathed element (metal tube around nichrome, no water contact with energized conductor) eliminates the AC vs DC concern entirely. Custom 48V Incoloy-sheathed elements available from OEM Heaters (oemheaters.com). DIY copper pipe flow housing as vessel — standard plumbing tee with screw-plug element.
 
-**Physical layout question:** Induction driver hardware at the faucet vs under-sink. At 5kW the driver generates heat and needs clearance — separating heater unit (under-sink) from faucet valve is more practical.
+**Control architecture documented:**
 
----
+```
+48V bus → [ANL fuse 80A] → [EV200 contactor] → [MOSFET IRFP4568] → DERNORD elements
+48V bus → [48→12V buck] → ESP32 + contactor coil
+Flow switch in series with EV200 coil → hard disconnect on flow stop, independent of ESP32
+NTC thermistors (10kΩ @ 25°C, B=3950, M4 probe) at inlet and outlet
+```
 
-## Entry 8 — Faucet Heater with Incoloy Element, Full Design (chat: 990abbdd)
-
-Most evolved design session. Consolidated the faucet heater and upstream tank concepts.
-
-**Two-stage architecture confirmed:**
-1. **Upstream tank** (under counter): pre-tempered water store, Dernord 48V/1500W element, insulated
-2. **Faucet body heater**: in-line boost at point of use, feeds from tank
-
-**Faucet body spec:**
-- Body: 2" stainless sanitary tube, ~14" long, ~840mL volume
-- Element: DERNORD 48V/1500W, U-bend, 1" NPSM, terminals at bottom
-- Insulation: Armaflex wrap on body
-- Mounting: vertical, deck-mount under counter
-- Control: ESP32, PIR motion sensor (predictive pre-heating), flow switch (activation gate), NTC thermistor at outlet
-- Flow gate: NC solenoid, temperature-gated by ESP32 (no flow if element not ready)
-- Handle: lever microswitch
-
-**Contactor flyback:**
-- EV200: built-in coil suppression, no external flyback diode needed
-- P115BDA/FDA: also built-in suppression, confirmed for both variants
-- Sharing 12V rail between contactor coil and ESP32: safe with either unit; add decoupling cap on ESP32 power input as good practice
-
-**Tank design evolution:**
-
-The Suburban propane tank was evaluated for conversion:
-- Flue tube penetrations (top and bottom) require welding to plug — feasible but adds a fabrication step
-- **Fogatti HybridShower 6 Ultra** identified as best drop-in commercial option: fits 13×13" cutout, EPDM foam insulation (<25% heat loss in 24 hours), dual fuel but gas line simply not connected, 1440W 120VAC element → swap for DERNORD 48V/1500W, ~$300
-- **Custom SS tank** also designed: 6-gallon SS304 pressure vessel, 1" NPSM element port, ½" NPT drain/PRV/inlet/outlet, 1" aerogel blanket + 2" closed cell spray foam, estimated standby loss ~4–5W
-
-**Super-insulated tank thermal performance:**
-
-| Insulation | Standby loss | Tank at 9pm (heated to 110°F at 3pm) |
-|---|---|---|
-| Suburban (propane flue) | ~71W | ~85°F |
-| Fogatti (EPDM foam) | ~25% / 24hr | ~107°F |
-| Custom aerogel+foam | ~4–5W | ~109°F |
-
-**Propane generator as backup:** Rather than propane water heating, a small propane inverter generator (Honda EU2200i or similar, ~1.8kW) used on cloudy days charges the 48V battery, which then runs everything including the water heater through the same DC path. Eliminates dedicated propane water heating plumbing entirely.
-
-**Current tank plan:** Custom triclamp vessel using stainless sanitary tube/spool components with DERNORD element. Exact dimensions TBD pending offline design work. [photo: chat 990abbdd]
-
-**MOSFET gate drive open question:**
-
-ESP32 GPIO is 3.3V; IRFP4568 Vgs(th) ~4V — marginal enhancement. May need a gate driver IC between ESP32 and MOSFET gate. Not yet resolved.
-
-**BoM document created** during this session: `dc-faucet-heater-bom.md` (partial, to be updated).
-
----
-
-## Entry 9 — Control Circuit Detail and Open Questions (chat: 335e1db9)
-
-Produced a detailed BoM and circuit open questions document.
-
-**Control architecture:**
-- 48V bus → ANL fuse (80A) → MOSFET (IRFP4568 or equiv) → DERNORD elements
-- EV200 contactor as master disconnect (safety interlock)
-- Flow switch opens EV200 coil circuit on flow stop — hard disconnect independent of ESP32 state
-- 48V → 12V buck (Pololu or similar) powers ESP32 and contactor coil
-- NTC thermistors (10kΩ @ 25°C, B=3950) at inlet and outlet
-
-**Open questions documented (for future resolution):**
+**Open questions documented:**
 
 *Electrical:*
-- Measured resistance of DERNORD 48V/1500W at operating temperature (cold R = 1.54Ω)
-- Two elements in parallel = 0.77Ω → 3000W at 48V — sufficient for 0.5 GPM worst-case inlet?
-- ESP32 3.3V GPIO → IRFP4568 gate: fully enhanced? Gate driver IC needed?
-- Flyback diode across MOSFET for inductive transients from wiring? (Resistive load — probably not needed)
+- DERNORD 48V/1500W cold R = 1.54Ω; two in parallel = 0.77Ω → 3000W — confirm measured resistance at operating temp
+- ESP32 GPIO is 3.3V; IRFP4568 Vgs(th) ~4V — may need gate driver IC
+- Flyback diode across MOSFET: resistive load, probably not needed, confirm
 
-*Plumbing/vessel:*
-- DERNORD 1500W physical fit in RTE-13 brass tubes — confirmed thread compatible, water tightness not tested, tubes too small (abandoned)
-- Outlet thermistor placement: tee on hot outlet pipe vs boss on vessel
-
-*Potable water safety:*
-- RTE-13 brass vessel alloys — lead content in older brass? (Moot — RTEX vessel abandoned)
-- DERNORD stainless SUS304 — adequate for potable water, or specify 316L?
-- Electrical isolation: is sheathed element inherently isolated from water, or is bonding/grounding needed?
-- Electrolysis risk at 48V DC with sheathed elements?
-- Copper pipe vessel pressure rating at 60–80 PSI mains?
+*Plumbing / potable water:*
+- Outlet thermistor placement
+- DERNORD sheath material SUS304 vs 316L for potable water — specify 316L
+- Electrical isolation of sheathed element from water — bonding/grounding requirements
+- Electrolysis risk at 48V DC with sheathed elements
 
 *Control:*
-- PID thermal lag: time between element power change and outlet thermistor response at 0.5 GPM
-- Minimum flow rate before activation (flow switch threshold)
-- Behavior at very low flow (dribble) — element overheat before flow switch activates?
+- PID thermal lag at 0.5 GPM
+- Minimum flow threshold for flow switch — prevent dry-fire at dribble flow
+- Stripboard layout not yet produced
+
+**Status at end of session:** Bare wire path definitively closed. Sheathed element confirmed as only viable path for potable water. Control architecture drafted. MOSFETs not yet on hand.
+
+---
+
+## Entry 5 — In-Faucet Heater with Incoloy Element: Full Design (2026-03-31, chat: 990abbdd)
+
+**Two-stage architecture confirmed:**
+
+1. **Upstream tank** (under counter): pre-tempered water store, Dernord element, insulated
+2. **Faucet body heater**: in-line boost at point of use, feeds from tank
+
+**Faucet body design:**
+
+- Body: 2" stainless sanitary tube, ~14" long, ~840mL volume, Armaflex insulation
+- Element: DERNORD 48V/1500W, U-bend, 1" NPSM, Incoloy sheath, terminals at bottom
+- Control: ESP32, PIR motion sensor (predictive pre-heating), flow switch, NTC thermistor at outlet
+- Flow gate: NC solenoid, temperature-gated (no flow until water is at temperature)
+- Handle: lever microswitch
+- Mounting: vertical under counter
+
+**Aluminum block vs pipe + Dernord:**
+
+Evaluated aluminum block with cartridge heaters as alternative vessel. For the boost stage specifically (flow-through by nature — pre-tempered water needs 20–25°F lift) the aluminum block argument partially applies. However, Dernord pipe body wins on simplicity and potable water safety; boost logic belongs in control system, not a separate vessel.
+
+**Upstream tank options evaluated:**
+
+- *Fogatti HybridShower 6 Ultra:* best drop-in commercial option (13×13" cutout, EPDM foam, <25% heat loss/24hr, 1440W 120VAC element → swap for DERNORD 48V/1500W, ~$300)
+- *Custom super-insulated tank:* aerogel + closed cell foam, ~4–5W standby loss — subsequently superseded by triclamp vessel approach
+- *Custom triclamp vessel:* current plan (see Entry 7)
+
+**Propane generator as backup:** On cloudy days, a small propane inverter generator charges the 48V battery → same DC path serves all heating. No dedicated propane water heater plumbing needed.
+
+**DERNORD 1500W element fit confirmed:** R = 1.54Ω cold → 1500W at 48V. Ordered.
+
+**Sharing the project:** Decided on Hackaday.io for project logs + GitHub repo for ESP32 firmware and BoM. No Hackaday draft written yet.
+
+**Status at end of session:** Two-stage architecture locked. Faucet body spec complete. DERNORD element ordered. Tank approach still in flux.
+
+---
+
+## Entry 6 — Dernord Element Thread and Copper Pipe Vessel (2026-03-31, chat: 5343810f)
+
+**Thread clarification:**
+
+DERNORD 48V/1500W is 1" NPSM — a straight thread that seals via face gasket. Confirmed compatible with standard 1" NPT female fittings — face gasket seals regardless of thread taper mismatch.
+
+**Copper pipe vessel exploration:**
+
+Explored 2" copper pipe as tank body with a soldered 1" NPT weld bung for the element port and SharkBite push-fit ½" side inlet. Pursued briefly for prototyping simplicity, then **abandoned in favor of stainless triclamp** (Entry 7) due to:
+- Copper's high thermal conductivity increases standby heat loss vs stainless
+- Soldering/brazing required for NPT bung — not tool-free
+- Triclamp offers cleaner, fully disassemblable construction
+
+---
+
+## Entry 7 — Triclamp Vessel: Pivot from Copper (2026-04-01, chat: 897332ec)
+
+**Why triclamp:**
+
+- Stainless steel thermal conductivity ~15 W/m·K vs copper ~400 W/m·K → significantly lower standby heat loss
+- Fully disassemblable — no soldering, clean serviceability
+- DERNORD 2" tri-clamp × 1" FNPT adapter exists off-shelf — element port solved without fabrication
+- All-clamp construction handles RV vibration well with EPDM gaskets + hex bolt clamps
+
+**Vibration:** Mount tube rigidly; EPDM or silicone gaskets (more compliant than PTFE); hex bolt clamps preferred over wing nut.
+
+**Temperature sensing:** ½" NPT side ports in SS spool tube wall for direct water temperature measurement. DERNORD sells spool pieces with NPT side ports.
+
+**Triclamp BOM (draft):**
+
+| Component | Spec |
+|---|---|
+| Vessel body | 2" SS304 tri-clamp spool tube, ~14" |
+| Element port (right end) | DERNORD 2" TC × 1" FNPT adapter |
+| Left end cap | 2" TC blank ferrule |
+| Inlet (bottom-left) | 2" TC spool with ½" NPT side port, PEX adapter |
+| Outlet (top-right) | 2" TC spool with ½" NPT side port, 3/8" faucet fitting |
+| Temp ports | ½" NPT thermowell in spool side ports |
+| Clamps | 4× 2" hex bolt TC clamps |
+| Gaskets | 4× 2" EPDM |
+| Insulation | 2" foam pipe sleeve + end foam |
+| Element | DERNORD 48V/1500W, 1" NPSM |
+
+**Suppliers:** McMaster-Carr (best documentation), Glacier Tanks / BrewHardware.com (brewing-focused, good 2" selection), Beduan / QiiMii on Amazon (good Dernord alternatives). Copper pipe vessel path **abandoned**.
+
+**Status at end of session:** Triclamp SS vessel confirmed as tank architecture. BOM drafted. Offline design work to follow.
+
+---
+
+## Entry 8 — DC Power Safety Research: Confirmation of Hard Stop (2026-04-01, chat: 1c02e9c2)
+
+Follow-up research session confirming the bare wire DC electrolysis conclusion from Entry 4.
+
+**Research findings:**
+
+- Trade knowledge confirms DC as the primary culprit for electrolytic corrosion; AC needs to be converted to DC before causing metallic corrosion
+- **Chinese patent CN102878666B:** specifically an anti-electrolysis design for bare wire heaters, acknowledging electrolytic corrosion and "electrolytic pollution" as real engineering problems. Solution: nickel alloy for all water-contact surfaces with matched electrode potentials, keeping surface electrostatic double-layer potential below 0.8V. This patent confirms the problem is serious enough to warrant dedicated engineering.
+- DIY solar community confirms sheathed elements eliminate the AC vs DC concern entirely
+- Gap in literature: no rigorous study measuring actual metal ion contamination from DC bare wire heaters in drinking water, but the mechanism is uncontested
+
+**Conclusion:** Prior hard stop confirmed. Sheathed (Incoloy) element is the only viable path for potable water at 48V DC.
+
+---
+
+## Entry 9 — Induction Heating Deep Dive (2026-04-06, chat: 3d3a96e3)
+
+Full investigation of induction heating, which had been selected in Entry 2 but not yet explored in depth.
+
+**How it works:** AC current through a coil induces eddy currents in a conductive pipe section (carbon steel or 304SS), which self-heats resistively. The coil is not in contact with water. Skin depth δ = √(2ρ/ωμ) — higher frequency concentrates currents at surface.
+
+**Solenoid vs pancake coil:**
+
+- *Solenoid:* coil wraps around the tube, heats cylindrical wall. Over a 40mm tube gains ~50cm² active area along its length. Efficient coupling.
+- *Pancake:* flat spiral coil, generates field axially through a disc susceptor. The "coin in the tube" geometry — stainless disc, face perpendicular to flow, holes punched through it, pancake coil around the outside of the spout.
+  - Interesting for: zero thermal lag, heating right at the tip, large surface area relative to volume
+  - Problem at 1500W+: requires disc >100mm diameter to avoid local boiling — defeats compact inline goal
+  - Fine at low power (~52W), not viable at shower-scale
+
+**ZVS resonant inverter:** From 48V DC, a resonant LLC or series-resonant inverter drives the coil at 20–100kHz. Efficiency ~90–95%. At 3000W the coil carries 150–300A peak AC, requiring 8–10mm OD copper tube and active water cooling.
+
+**Aluminum block with cartridge heaters (also evaluated):**
+
+At low power, an aluminum block with cartridge heaters in bored holes and a machined water channel provides the same zero-galvanic-contact benefit at much lower complexity — simpler, cheaper, more reliable, and easier to seal than induction.
+
+**Why induction was not pursued:**
+
+The power electronics complexity (ZVS inverter design, resonant tank tuning, coil winding, coil cooling at >1kW) is significant. The galvanic isolation benefit is achieved more simply with a sheathed resistive element (Incoloy sheath isolates the conductor from water). The induction exploration was also superseded by the confirmation in Entries 4 and 8 that sheathed elements are the correct path for potable water. **Documented here to avoid re-exploring without strong new justification.**
+
+---
+
+## Entry 10 — Tube Volume and Flow Heating Calculations (2026-04-08, chats: 5383b80a and c6e81b48)
+
+Supporting sizing calculations:
+
+- 2" sanitary tube, 8" long: ~360mL bore; at 0.5 GPM flow, residence time ~11.4s; 1500W heats 360mL by 35°F in ~19.5s — marginal for flow-through
+- 3" sanitary tube, 8" long: ~847mL bore
+- 1¼" brass pipe, 8" long (×2): liquid volume ~337mL
+
+**Confirmed:** pure flow-through tankless at RV faucet flow rates requires very high power or very low flow. Tank-as-buffer is the right architecture.
+
+---
+
+## Entry 11 — Pressure and Thermal Safety in Triclamp Vessels (2026-04-12, chat: 440924ad)
+
+Standard EPDM-gasketed triclamp fittings rated ~150 PSI. Water reaches 150 PSI only at ~185°C — not achievable in normal operation. RV water systems typically lack the check valve that creates closed-system thermal expansion problems in residential plumbing; thermal expansion pushes back into the supply line. PRV added as good practice.
+
+Thermal expansion risk if both valves are closed and vessel is heated (sealed incompressible fluid): even 20°C→60°C can spike hundreds of PSI. Mitigated by open RV system and PRV.
+
+At RV supply pressure (~60–80 PSI): well below the 150 PSI EPDM limit. No pressure safety concern under normal operation.
+
+---
+
+## Entry 12 — Temperature Control: Snap Disc and ESP32 Thermostat (2026-04-12, chat: f9413753)
+
+**Safety cutoff:** Bimetallic snap disc thermostat (NC, opens at 110°F) wired in series with contactor coil signal line. Clamped to copper nipple with thermal paste + self-fusing silicone tape. Hardware-level cutoff, no electronics required.
+
+**ESP32 thermostat with boost mode:** ESP32 + NTC probe (10kΩ @ 25°C, B=3950) + 5V relay module. One button toggles between two hardcoded setpoints (~85°F normal, ~104°F boost). 48V → Pololu D24V10F5 (5V) → ESP32. Relay contacts switch 12V coil signal to EV200.
+
+**PID vs PWM:** PID appropriate for contactor (on/off output with smart timing, accounts for error, rate of change, accumulated error). PWM (fixed frequency, variable duty cycle) appropriate for direct power modulation, not for a contactor. Wide hysteresis essential to avoid rapid cycling (EV200 not rated for high cycle counts).
 
 ---
 
