@@ -15,13 +15,13 @@ Point-of-use heating under the counter at the kitchen faucet:
 ```
 48V battery
     │
-    ├─── [ANL fuse 80A] ─── [EV200 contactor] ─── [MOSFET] ─── DERNORD element(s)
-    │                                                                    │
-    │                                                             Triclamp tank (pre-tempered store)
-    │                                                                    │
-    │                                                              Faucet outlet
+    ├─── [ANL fuse 80A] ─── [EV200 contactor] ─── [P115 contactor(s)] ─── DERNORD element(s)
+    │                                                                                │
+    │                                                                    Triclamp tank (pre-tempered store)
+    │                                                                                │
+    │                                                                         Faucet outlet
     │
-    └─── [48V→12V buck] ─── ESP32 + contactor coil + sensors
+    └─── [48V→12V buck] ─── ESP32 + relay module + sensors
 ```
 
 **Under-counter triclamp tank:** pre-tempered water store, heated by DERNORD element, maintained at target temperature. Eliminates cold water purge at faucet.
@@ -54,7 +54,6 @@ Custom triclamp stainless vessel (see explore.md Entry 8 for rationale and full 
 
 - Cold resistance: ~1.54Ω → 1500W at 48V, ~31A per element
 - Two elements in parallel: ~0.77Ω → ~3000W at 48V
-- Used in both the triclamp tank and the faucet body heater
 - Incoloy sheath electrically isolates energized conductor from water — eliminates DC electrolysis concern (see explore.md Entries 5 and 9)
 
 **Build task:** measure actual cold resistance on delivery; verify sheath is SS316L not SUS304.
@@ -75,12 +74,15 @@ TMV (thermostatic mixing valve) downstream handles fine temperature control; con
 ### Architecture
 
 ```
-48V bus → [ANL fuse 80A] → [EV200 contactor] → [MOSFET IRFP4568] → DERNORD elements
-48V bus → [48V→12V buck] → ESP32 + contactor coil
+48V bus → [ANL fuse 80A] → [EV200 contactor] → [P115 contactor(s)] → DERNORD element(s)
+48V bus → [48V→12V buck] → ESP32 + relay module
 Flow switch in series with EV200 coil → hard disconnect on flow stop, independent of ESP32
-NTC thermistors (10kΩ @ 25°C, B=3950, M4 probe) at inlet and outlet
+NTC thermistor (10kΩ @ 25°C, B=3950, M4 probe) at tank outlet
 Snap disc thermostat (NC, opens at 110°F) in series with contactor coil signal — hardware safety cutoff
+ESP32 thermostat: setpoint A ~80°F (maintain), setpoint B ~104°F (boost), one-button toggle
 ```
+
+ESP32 acts as a configurable thermostat — reads outlet thermistor, energizes P115 contactor(s) via relay module to switch element power on/off. No PWM or FET in the power path. Staged power (1× or 2× elements via P115 contactors) selects heat rate; thermostat logic controls duty cycle within the active stage.
 
 ### Components
 
@@ -89,22 +91,18 @@ Snap disc thermostat (NC, opens at 110°F) in series with contactor coil signal 
 | Microcontroller | ESP32 dev board | on hand |
 | Master contactor | EV200 (12V coil, 500A rated) | on hand |
 | Per-element contactor | P115BDA (12V coil, 50A rated) | on hand |
-| Power switch | MOSFET IRFP4568 (TO-247) | **not yet on hand** |
 | Buck converter | Pololu D24V10F5 or equiv (48V→5V) | TBD |
-| Thermistors | NTC 10kΩ @ 25°C, B=3950, M4 probe | TBD |
+| Thermistor | NTC 10kΩ @ 25°C, B=3950, M4 probe | TBD |
 | Flow switch | TBD | TBD |
-| PIR sensor | TBD | TBD |
 | Relay module | SRD-05VDC-SL-C (5V) | TBD |
 | Snap disc thermostat | NC, opens at 110°F | TBD |
-| Lever microswitch | faucet handle detection | TBD |
 
 ### Open Questions
 
-- [ ] **MOSFET gate drive:** ESP32 GPIO is 3.3V; IRFP4568 Vgs(th) ~4V — confirm whether 3.3V fully enhances, or add gate driver IC
 - [ ] **Outlet thermistor placement:** where to locate on triclamp tank for accurate outlet temp reading
 - [ ] **Minimum flow threshold:** flow switch must activate above dribble flow to prevent dry-fire; identify suitable paddle/flow switch and its threshold
 - [ ] **Stripboard layout:** ESP32 driver circuit not yet produced
-- [ ] **PID tuning:** thermal lag between element power change and outlet thermistor at 0.5 GPM — characterize and tune after build
+- [ ] **Hysteresis band:** characterize thermal lag at outlet thermistor vs element on/off at 0.5 GPM; set deadband wide enough to prevent rapid contactor cycling
 
 ---
 
@@ -119,4 +117,4 @@ Snap disc thermostat (NC, opens at 110°F) in series with contactor coil signal 
 | Triclamp tank not RTEX vessel | RTEX copper tubes ~1¼" diameter — too little water volume; see explore.md Entry 4 |
 | Triclamp tank not Fogatti drop-in | Custom triclamp vessel better fits under-counter two-stage architecture; see explore.md Entry 6 |
 | No propane water heating | Propane generator (if needed) charges 48V battery; single DC path serves all heating |
-| Staged contactors not PWM | Resistive load; binary staging + downstream TMV is simpler and avoids contactor cycle wear |
+| Contactors not FET/PWM for power switching | Resistive load; on/off thermostat via contactor is simpler, no gate drive problem, avoids PWM complexity; see explore.md Entry 15 |

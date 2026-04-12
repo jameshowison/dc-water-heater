@@ -381,6 +381,18 @@ At RV supply pressure (~60–80 PSI): well below the 150 PSI EPDM limit. No pres
 
 ---
 
+## Entry 15 — Control Simplification: Thermostat Not FET/PWM (2026-04-12)
+
+**What was considered:** MOSFET (IRFP4568, TO-247) in the 48V power path for fine power control — either PWM duty-cycle modulation of element power or as a solid-state switch driven by ESP32 GPIO. Raised an immediate problem: ESP32 GPIO outputs 3.3V; IRFP4568 Vgs(th) is ~4V, so the gate would not fully enhance without a gate driver IC. This added a component and a design question.
+
+**Decision:** Remove the FET entirely. The ESP32 acts as a configurable thermostat — reads an NTC outlet thermistor, drives the P115 contactor coil(s) via a 5V relay module to switch element power on/off. Two hardcoded setpoints: ~80°F (maintain) and ~104°F (boost), toggled by a single button.
+
+**Why this is sufficient:** The load is purely resistive. PWM on a resistive element would only average power over a cycle — the same effect achieved more simply by the thermostat's on/off duty cycle over longer timescales. The P115 contactors already provide staged power (1× or 2× elements = 1500W or 3000W); thermostat hysteresis controls temperature within a stage. No FET, no gate driver, no PWM frequency to choose.
+
+**What moves out of BoM:** IRFP4568 MOSFET (TO-247), gate driver IC.
+
+---
+
 ## Entry 14 — Faucet Body Heater: Concept Parked (2026-04-12)
 
 **The concept:** A second heating stage at the point of use — a 2" SS sanitary tube body ~14" long (~840mL), DERNORD 48V/1500W element, Armaflex insulated, mounted vertically under the counter. Control via PIR motion sensor for predictive pre-heating, lever microswitch on faucet handle, NTC thermistor at outlet, and an NC solenoid gate held open only when water is at temperature. The idea was to eliminate any cold-water delay at the faucet and provide a boost stage fed from the upstream triclamp tank.
