@@ -8,6 +8,31 @@ For full design history and decision rationale, see `explore.md`.
 
 ---
 
+## Problem Statement
+
+The existing RV water heater is a Suburban propane/electric combo tank with several problems:
+
+- **Standby heat loss:** the existing tank loses heat faster than expected — likely poor insulation; the propane flue running through the center may contribute but this is unconfirmed
+- **Tank waste:** heating a full tank for small draws wastes energy
+- **Cold purge waste:** hot water sitting in the pipe between tank and faucet is lost before hot water arrives
+- **Maintenance burden:** anode rod management, seasonal draining for freeze protection
+
+**Actual use pattern — short draws only:**
+
+| Activity | Hot water needed |
+|---|---|
+| Hand wash | ~0.5 gal |
+| Dish basin | ~5 gal |
+| Short shower (5 min, low-flow) | ~5 gal |
+
+A hand wash draws 10× less water than a dish basin; a short shower and a dish basin are the same volume. These are all small, intermittent draws — not continuous high-flow demand.
+
+**Why this rules out tankless:** at RV faucet flow rates (0.5–1.5 GPM), tankless requires 5–14 kW. At 48V DC that means 100–300A — not practical. Tanks tolerate slow recharge (1500W at 48V = ~31A); a pre-tempered tank delivers hot water instantly on demand from stored thermal energy. The RV use pattern — short draws spaced out over time — is exactly the pattern that makes tank-as-buffer work and tankless infeasible (see explore.md Entries 3 and 11).
+
+**Goal:** Replace propane/electric system with a 48V DC under-counter tank, charged slowly from the existing battery, eliminating standby losses and cold purge delay.
+
+---
+
 ## System Architecture
 
 Point-of-use heating under the counter at the kitchen faucet:
@@ -45,7 +70,9 @@ Custom triclamp stainless vessel (see explore.md Entry 8 for rationale and full 
 | Gaskets | 4× EPDM (compliant, RV vibration tolerant) |
 | Insulation | 2" foam pipe sleeve + end foam |
 
-**Build task (not a design question):** complete triclamp tank detailed physical assembly.
+**Build tasks (not design questions):**
+- Complete triclamp tank detailed physical assembly
+- Insulate supply pipes between new under-counter triclamp tank and the old Suburban tank — uninsulated pipes are a standby heat loss path
 
 ---
 

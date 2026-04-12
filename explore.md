@@ -11,7 +11,7 @@ This journal records the design explorations for a 48V DC water heating system i
 The existing RV water heater is a Suburban propane/electric combo tank. Core problems identified:
 
 - Heating a full tank wastes energy relative to the small water draws needed for dish washing and hand washing
-- The propane burner uses a flue tube running through the center of the tank — this acts as a chimney when the burner is off, causing significant standby heat loss. The flue is an anti-thermos.
+- The existing tank loses heat faster than expected — likely poor insulation; the propane burner flue running through the center of the tank may act as a chimney when off, but this is unconfirmed
 - Tanks need protection against corrosion (anode rod management) and require draining for freeze protection
 - Hot water sitting in pipes between the tank and the faucet is wasted (cold water purge before hot arrives)
 
