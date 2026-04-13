@@ -64,15 +64,17 @@ Custom triclamp stainless vessel (see explore.md Entry 8 for rationale and full 
 | Element port (right end) | DERNORD 2" TC × 1" FNPT adapter |
 | Left end cap | 2" TC blank ferrule |
 | Inlet (bottom-left) | 2" TC spool with ½" NPT side port, PEX adapter |
-| Outlet (top-right) | 2" TC spool with ½" NPT side port, 3/8" faucet fitting |
-| Sensor nipples | ½" NPT × ~1" copper nipple on inlet and outlet side ports — surface-mount point for NTC thermistor and snap disc |
+| Outlet (top-right) | 2" TC spool with ½" NPT side port |
+| Outlet copper nipple | ½" NPT × 2" copper nipple — thermal bridge for NTC thermistor and snap disc (copper conducts ~25× better than SS); sensors mount on nipple body under foam insulation |
+| Faucet shutoff valve | ½" NPT inline shutoff — after outlet nipple, before faucet; allows heater isolation for maintenance without cutting all water | TBD — faucet connection beyond shutoff not yet sorted |
 | Clamps | 4× 2" hex bolt TC clamps |
 | Gaskets | 4× EPDM (compliant, RV vibration tolerant) |
 | Insulation | 2" foam pipe sleeve + end foam |
 
 **Build tasks (not design questions):**
 - Complete triclamp tank detailed physical assembly
-- Fit copper nipples in inlet and outlet side ports; surface-mount NTC thermistor on outlet nipple and snap disc on outlet nipple, both with thermal paste + self-fusing silicone tape
+- Fit 2" copper nipple into outlet side port; mount bead NTC thermistor and snap disc on nipple body, both as close to tank wall as possible, with thermal paste + self-fusing silicone tape, then cover with foam insulation sleeve — sensors go under insulation so air-cooling is eliminated
+- Install inline shutoff valve after outlet nipple (faucet connection beyond shutoff TBD)
 - Insulate supply pipes between new under-counter triclamp tank and the old Suburban tank — uninsulated pipes are a standby heat loss path
   - **Purchase:** PATIKIL 2" ID (51mm) foam pipe insulation (Lowe's) for the 2" OD triclamp spool body — standard IPS-sized "2 inch pipe" insulation is too large (fits 2.375" OD, not 2.00")
   - **Purchase:** Frost King or Everbilt ½" foam pipe insulation (Home Depot or Lowe's) for ½" PEX supply runs
@@ -128,8 +130,8 @@ Fine-stranded welding cable or marine-grade tinned copper preferred for RV flex/
                        └→ [P115 contactor] → DERNORD element   (optional second element)
 48V bus → [48V→12V buck] → ESP32 + relay module
 ESP32 → relay module → 12V coil signal → P115 contactor(s)
-Snap disc (NC, opens at 110°F) in series with 12V coil signal — hardware safety cutoff
-NTC thermistor (10kΩ @ 25°C, B=3950, M4 probe) at tank outlet → ESP32 ADC
+Snap disc (NC, opens at 113°F / 45°C) in series with 12V coil signal — hardware safety cutoff
+NTC thermistor (10kΩ @ 25°C, B=3950, bead type) on outlet copper nipple → ESP32 ADC
 ESP32 thermostat: setpoint A ~80°F (maintain), setpoint B ~104°F (boost), three state-button (off, maintain, boost). 
 ```
 
@@ -142,11 +144,11 @@ One P115 contactor per element; 1 or 2 elements fitted depending on heating rate
 | Microcontroller | AITRIP ESP32-WROOM-32, 30-pin DevKit, CP2102 USB-C (ESP-WROOM-32) | on hand |
 | Contactor (one per element) | P115BDA (12V coil, 50A rated) | on hand |
 | Control supply | **Preferred: existing Victron 12V rail** (360W, lightly loaded). Alternative: Pololu APM81815 buck (#5269, 12.1–72V in, 12V/0.8A out) if self-contained 48V supply needed. See explore.md Entry 25. | TBD |
-| Thermistor | NTC 10kΩ @ 25°C, B=3950, M4 probe | TBD |
+| Thermistor | NTC 10kΩ @ 25°C, B=3950, bead type with leads | TBD |
 | Relay module | Pololu 2482 (Basic SPDT Relay Carrier, 12VDC, active-high EN pin) × 2 — one per contactor | TBD |
-| Snap disc thermostat | NC, opens at 110°F | TBD |
+| Snap disc thermostat | NC, opens at 113°F (45°C) — see explore.md Entry 27 for trip point rationale and TMV contingency | TBD |
 | Pressure switch | NO, ¼" NPT, set point 10–15 psi, potable-water rated | TBD |
-| Inlet tee + bushing | ½" NPT tee + ½"→¼" NPT bushing (for pressure switch tap on inlet line) | TBD |
+| Inlet tee + bushing | ½" NPT street tee (one male end to screw into tank inlet port, two female) + ½"→¼" NPT bushing for pressure switch branch; run port to PEX supply adapter | TBD |
 
 ### Open Questions
 

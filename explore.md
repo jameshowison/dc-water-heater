@@ -661,4 +661,83 @@ No new tank ports required. Tank BOM unchanged.
 
 ---
 
+## Entry 27 — Sensor Format, Mounting, and Snap Disc Trip Point (2026-04-13)
+
+**Question:** What sensor format and mounting approach should be used for the NTC thermistor and snap disc on the outlet copper nipple? And what is the right snap disc trip temperature?
+
+### Sensor format
+
+Three candidates evaluated:
+
+- **M4 probe** (original spec): bolt-type probe designed to press flat against a flat metal surface. On a ½" copper nipple (OD ~0.84"), contact is line-contact at best — the flat probe face against a curved pipe is a geometric mismatch. Rejected.
+- **Pipe clamp thermistor**: spring-loaded clamp designed for cylindrical pipes. Good contact on straight runs. Too bulky for a ~1" nipple stub close to the tank wall. Rejected for this geometry.
+- **Bead NTC with leads** (selected): small glass or epoxy bead, very conformable, presses flat against curved surface with thermal paste, held with self-fusing silicone tape. Simple, cheap, fits the tight geometry. No bolt or clamp mechanism needed.
+
+**Decision:** bead NTC thermistor, 10kΩ @ 25°C, B=3950.
+
+### Mounting approach
+
+Both sensors (NTC thermistor and snap disc) mount on the outlet copper nipple, as close to the tank wall as practical. Foam insulation sleeve then goes over the entire nipple assembly, trapping the sensors between copper and foam.
+
+**Key insight:** mounting under insulation eliminates air-cooling of the sensor surface. Without insulation, ambient air cools the outer nipple surface and the sensor reads lower than water temperature. Under insulation, the copper nipple surface temperature tracks water temperature closely. This materially improves accuracy and was not captured in the original plan.
+
+Wire leads exit through a slit in the foam sleeve; self-fusing silicone tape seals the assembly.
+
+### Snap disc trip point
+
+**Original spec: 110°F.** Rejected — only 6°F above the boost setpoint of 104°F. With hysteresis, element could be off at 106–108°F surface, leaving only 2–4°F to snap disc trip. Too little margin for a backup safety device.
+
+**Selected: 113°F (45°C).** This is a standard snap disc temperature, widely available. Provides 9°F of margin above the 104°F boost setpoint. With sensors mounted under insulation (surface temp closely tracking water temp), 113°F surface corresponds to ~113–115°F actual water — warm but not immediately scalding. Snap disc is a backup; normal operation never approaches this temperature.
+
+**If 113°F nuisance-trips:** upgrade to a 130°F snap disc and add a TMV (thermostatic mixing valve) at the tank outlet. A TMV blends cold supply water with hot tank water to deliver a fixed outlet temperature (set to ~110°F), protecting against scalding even if the tank reaches 130°F. TMV plumbing requires a cold-supply tee upstream of the tank:
+
+```
+cold supply ─┬─── tank inlet
+             └─── TMV cold inlet ┐
+tank outlet ──────── TMV hot inlet ┼─── faucet
+                                  ┘
+```
+
+TMV is a contingency — do not purchase until 113°F snap disc behavior is characterized in use.
+
+**Status: resolved.** Bead NTC, mounted under insulation close to tank wall. Snap disc at 113°F (45°C). TMV documented as fallback if nuisance-tripping occurs.
+
+---
+
+## Entry 28 — Outlet and Inlet Plumbing Stack (2026-04-13)
+
+**Question:** What fittings are needed at the inlet and outlet ports, accounting for the pressure switch, sensors, and faucet connection?
+
+### Inlet stack
+
+The inlet ½" NPT side port needs three connections: to the PEX supply (upstream), into the tank (downstream), and a branch for the pressure switch. A street tee (one male NPT end, two female NPT ends) screws directly into the tank's ½" NPT female inlet port with no intermediate nipple needed:
+
+```
+PEX supply → PEX adapter → ½" NPT street tee (female run port)
+                                 │ male end → tank ½" NPT inlet port
+                                 └── ½"→¼" bushing → pressure switch (NO, 10–15 psi)
+```
+
+No copper nipple at the inlet — the copper nipple was originally specified for the NTC thermistor, which has since moved to the outlet (Entry 27). Inlet copper nipple removed from BOM.
+
+### Outlet stack
+
+The outlet ½" NPT side port needs to: provide a thermal bridge for both sensors, then connect to the faucet via a shutoff valve. A 2" copper nipple screws into the tank outlet port and gives ~25–30mm of usable body between thread engagements — enough for the snap disc (~20mm body) and NTC bead side by side. Foam insulation goes over the whole nipple assembly.
+
+```
+Tank ½" NPT female outlet port
+    └── 2" copper nipple (½" NPT male both ends)
+            [NTC bead + snap disc mounted on body, under foam]
+            └── inline shutoff valve (½" NPT)
+                    └── faucet connection (TBD — not yet sorted)
+```
+
+**Faucet shutoff valve:** not previously in the plan. Required for maintenance isolation — allows the heater to be serviced without cutting all water supply. Added to BOM as TBD.
+
+**Faucet connection beyond shutoff:** not resolved. Noted as a future task; do not pursue until tank is installed and the exact faucet fitting geometry is known.
+
+**Status: resolved** for inlet and outlet stacks up to the faucet shutoff. Faucet connection beyond the shutoff remains open.
+
+---
+
 *Journal continues as design progresses. See `plan.md` for current state.*
