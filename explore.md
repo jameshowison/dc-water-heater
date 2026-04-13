@@ -611,4 +611,20 @@ No new tank ports required. Tank BOM unchanged.
 
 ---
 
+## Entry 25 — Control Supply: Existing 12V Rail vs Dedicated Buck Converter (2026-04-12)
+
+**Question:** How should the ESP32 + relay modules be powered — from a buck converter on the 48V bus, or from the existing RV 12V rail?
+
+**Option A — Existing 12V Victron rail (preferred):** The RV has a Victron 360W 12V supply that is lightly loaded. Tapping it for the control circuit adds negligible load (~300–400mA typical for ESP32 + 2 relay coils) and requires no additional hardware. Simpler, one less component to fail.
+
+**Option B — Dedicated buck converter:** Pololu APM81815 (#5269). Specs: 12.1–72V input (80V absolute max), 12V fixed output, 0.8A typical max at 48V input, board 0.4"×0.75"×0.13". Input voltage headroom is good: 48V LiFePO4 (16 cells) charges to ~58.4V, well within the 72V rating. Output current is sufficient: ESP32 peak ~240mA + 2× relay coil ~50mA each = ~340mA typical. The D42V55F12 (#5577, 4.5A, 60V max) was also considered but its 60V max input leaves only 1.6V margin over charge voltage — too tight for a 48V LiFePO4 system.
+
+**Preferred: Option A.** Use the existing 12V rail. The APM81815 is the right buck converter if a self-contained 48V-only supply is ever needed (e.g., if the 12V rail is unavailable or if the control circuit is installed remote from the 12V distribution).
+
+**One consideration for Option A:** the control circuit depends on a separate supply. If the 12V rail is cut while the 48V heating circuit is energized, the contactors drop out (coil de-energized) and elements go cold — safe outcome. Snap disc hardware safety is independent of supply and remains functional regardless.
+
+**Status:** prefer existing 12V rail; APM81815 documented as fallback.
+
+---
+
 *Journal continues as design progresses. See `plan.md` for current state.*

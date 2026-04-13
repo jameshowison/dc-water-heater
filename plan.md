@@ -47,7 +47,7 @@ Point-of-use heating under the counter at the kitchen faucet:
     │                                                   │
     │                                            Faucet outlet
     │
-    └─── [48V→12V buck] ─── ESP32 + relay module + sensors
+    └─── [12V rail (Victron) or 48V→12V buck] ─── ESP32 + relay module + sensors
 ```
 
 **Under-counter triclamp tank:** pre-tempered water store, heated by DERNORD element, maintained at target temperature. Eliminates cold water purge at faucet.
@@ -139,7 +139,7 @@ One P115 contactor per element; 1 or 2 elements fitted depending on heating rate
 |---|---|---|
 | Microcontroller | AITRIP ESP32-WROOM-32, 30-pin DevKit, CP2102 USB-C (ESP-WROOM-32) | on hand |
 | Contactor (one per element) | P115BDA (12V coil, 50A rated) | on hand |
-| Buck converter | 48V→12V, ≥58V input rating (e.g. Pololu D57V45F12 or equiv) | TBD |
+| Control supply | **Preferred: existing Victron 12V rail** (360W, lightly loaded). Alternative: Pololu APM81815 buck (#5269, 12.1–72V in, 12V/0.8A out) if self-contained 48V supply needed. See explore.md Entry 25. | TBD |
 | Thermistor | NTC 10kΩ @ 25°C, B=3950, M4 probe | TBD |
 | Relay module | Pololu 2482 (Basic SPDT Relay Carrier, 12VDC, active-high EN pin) × 2 — one per contactor | TBD |
 | Snap disc thermostat | NC, opens at 110°F | TBD |
