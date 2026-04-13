@@ -591,4 +591,24 @@ No new tank ports required. Tank BOM unchanged.
 
 ---
 
+## Entry 24 — PRV: No Dedicated Valve Needed (2026-04-12)
+
+**Question:** Does the triclamp vessel require its own pressure relief valve (PRV/T&P valve) for thermal expansion protection?
+
+**Conclusion: No dedicated PRV needed.**
+
+**Normal operation — system is open:** Without a check valve in the system, the RV water circuit is inherently open. When the element heats water in the triclamp and it expands, the expanded volume pushes back upstream through the supply line toward the fresh water tank (vented reservoir) or city water inlet. There is no one-way barrier to trap it. Thermal expansion is a non-issue in normal operation.
+
+**Suburban's T&P valve covers the whole zone:** The Suburban tank has a standard T&P relief valve (typically 150 psi / 210°F). The triclamp shares the same supply line as the Suburban with no isolation valve between them, so they are in the same pressure zone. The Suburban's PRV provides coverage for the entire interconnected system.
+
+**"Both valves closed" edge case:** If the supply valve is manually closed and the faucet is also closed while the element heats, the vessel is temporarily isolated. Water's thermal expansion coefficient (~0.000214/°C) over a 60°F→104°F rise (≈24°C) gives ΔV/V ≈ 0.52%. In a perfectly rigid vessel the bulk modulus of water (~2.2 GPa) would produce enormous pressure. In practice, PEX tubing compliance and EPDM gasket compliance absorb some expansion, but pressure would still rise significantly. However: this requires deliberate manual action (not a failure mode), and the Suburban is in exactly the same situation — its T&P valve covers the whole interconnected zone.
+
+**City water pressure regulator nuance:** Some RV city water inlets have a pressure regulator that is directionally asymmetric and blocks backflow, acting like a soft check valve. This does not change the conclusion: the Suburban's T&P valve still covers the same pressure zone as the triclamp (no isolation valve between them).
+
+**One constraint this creates:** Do not add an isolation valve between the Suburban and the triclamp that would create a separate pressure zone containing only the triclamp. If that ever happens, a dedicated PRV would be required on the triclamp side. Current design has no such valve.
+
+**Status: resolved.** No dedicated PRV needed. No new hardware or tank ports required.
+
+---
+
 *Journal continues as design progresses. See `plan.md` for current state.*
