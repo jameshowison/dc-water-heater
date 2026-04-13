@@ -19,13 +19,15 @@ The existing RV water heater is a Suburban propane/electric combo tank with seve
 
 **Actual use pattern — short draws only:**
 
-| Activity | Hot water needed |
-|---|---|
-| Hand wash | ~0.5 gal |
-| Dish basin | ~5 gal |
-| Short shower (5 min, low-flow) | ~5 gal |
+| Activity | Hot water needed | Notes |
+|---|---|---|
+| Hand wash | ~0.5 gal | |
+| Dish wash (RV conservation pattern) | ~1.33 gal | 20 dishes × intermittent cycle (see below) |
+| Short shower (5 min, low-flow) | ~5 gal | |
 
-A hand wash draws 10× less water than a dish basin; a short shower and a dish basin are the same volume. These are all small, intermittent draws — not continuous high-flow demand.
+**RV dish-wash cycle (water-scarce pattern):** 4s wet draw → 5s washing → 4s rinse draw → 15s drying = 28s/dish. Flow is only 8s per dish (0.067 gal); the 20s off-time between draws is the critical feature — it allows the element to recover the tank to setpoint before the next draw. Total water for 20 dishes: ~1.33 gal (73% less than a continuous 5 gal pour). This is not a continuous draw and must not be modeled as one.
+
+A hand wash draws 10× less water than the RV dish pattern; a short shower draws 4× more. These are all small, intermittent draws — not continuous high-flow demand.
 
 **Why this rules out tankless:** at RV faucet flow rates (0.5–1.5 GPM), tankless requires 5–14 kW. At 48V DC that means 100–300A — not practical. Tanks tolerate slow recharge (1500W at 48V = ~31A); a pre-tempered tank delivers hot water instantly on demand from stored thermal energy. The RV use pattern — short draws spaced out over time — is exactly the pattern that makes tank-as-buffer work and tankless infeasible (see explore.md Entries 3 and 11).
 
@@ -60,7 +62,7 @@ Custom triclamp stainless vessel (see explore.md Entry 8 for rationale and full 
 
 | Component | Spec |
 |---|---|
-| Vessel body | 2" SS304 triclamp spool tube, ~14" |
+| Vessel body | 2" SS304 triclamp spool tube, ~10" |
 | Element port (right end) | DERNORD 2" TC × 1" FNPT adapter |
 | Left end cap | 2" TC blank ferrule |
 | Inlet (bottom-left) | 2" TC spool with ½" NPT side port, PEX adapter |
@@ -80,6 +82,7 @@ Custom triclamp stainless vessel (see explore.md Entry 8 for rationale and full 
   - **Purchase:** PATIKIL 2" ID (51mm) foam pipe insulation (Lowe's) for the 2" OD triclamp spool body — standard IPS-sized "2 inch pipe" insulation is too large (fits 2.375" OD, not 2.00")
   - **Purchase:** Frost King or Everbilt ½" foam pipe insulation (Home Depot or Lowe's) for ½" PEX supply runs
   - **Future task:** determine appropriate insulation for braided stainless supply line (braided SS exterior not compatible with standard foam sleeve adhesion)
+  - **Future task:** investigate hands-free faucet options — foot pedal or touch-activated. The RV dish-wash pattern (20 × 4s draws) means frequent on/off cycling with wet hands, putting water on the counter. A foot pedal or touch faucet would eliminate this. Requirements: ½" supply connection, under-counter compatible, 12V or battery powered if touch-activated. Evaluate whether existing faucet can be replaced or supplemented.
 
 ---
 
@@ -99,10 +102,10 @@ This is ordered, but currently have a 1000W dernord element with same thread.
 
 ### Power Staging (with 2× DERNORD elements)
 
-| Elements on | Power | ΔT at 0.5 GPM |
-|---|---|---|
-| 1 | 1,500W | +41°F |
-| 2 | 3,000W | +82°F |
+| Elements on | Power | ΔT at 0.25 GPM | ΔT at 0.5 GPM |
+|---|---|---|---|
+| 1 | 1,500W | +41°F | +20.5°F |
+| 2 | 3,000W | +82°F | +41°F |
 
 
 ---
@@ -162,7 +165,25 @@ One P115 contactor per element; 1 or 2 elements fitted depending on heating rate
 - [x] **PRV (pressure relief valve):** No dedicated PRV needed. Open system (no check valve) means thermal expansion pushes back upstream in normal operation. Suburban's existing T&P valve covers the full interconnected pressure zone. Constraint: never add an isolation valve between the Suburban and triclamp — that would create a separate zone requiring its own PRV. See explore.md Entry 24.
 - [x] **Winterization / blowout:** the triclamp tank sits 2' above the Suburban; most water drains back by gravity on winterization. Residual ~1" at the element base is not a freeze risk — air headspace in the upper half of the spool absorbs expansion, Incoloy sheath is not damaged by external ice, and no sealed cavity forms. No drain port or special procedure needed. Removing the element (same as Suburban practice) fully drains if desired. See explore.md Entry 29.
 - [ ] **ESP32 firmware (future task, park until hardware assembled):** thermostat logic, NTC Steinhart-Hart ADC conversion, hysteresis band, three-state button (off / maintain ~80°F / boost ~104°F), relay drive, watchdog timer. Off mode: relay de-energized, element off, tank cools to ambient — no target temperature maintained.
-- [ ] **Model boost warm-up and recovery time (do before deciding on second element):** for representative draws (hand wash ~0.5 gal, dish basin ~5 gal), model: (a) time to reach boost setpoint from maintain setpoint at 1× and 2× elements; (b) recovery time after each draw type at 1× and 2× elements. Use results to set expectations and decide whether single-element performance is sufficient.
+- [x] **Model boost warm-up and recovery time:** Modeling assumptions: inlet 50°F, flow 0.5 GPM, tank 0.119 gal (0.99 lb water + 1.12 lb SS tube = 1.13 BTU/°F thermal mass). Tank time constant during flow: τ = 16 sec.
+
+  **Static warm-up (no flow), maintain 80°F → boost 104°F:**
+  | Elements | Time |
+  |---|---|
+  | 1× | ~19 sec |
+  | 2× | ~10 sec |
+
+  **Outlet temp during continuous draw (flow-through steady state):**
+  | Elements | Steady-state outlet | Time to reach steady state |
+  |---|---|---|
+  | 1× | ~71°F | ~1 min |
+  | 2× | ~91°F | ~1 min |
+
+  **RV dish-wash cycle analysis (1× element, boost setpoint 104°F):** Per-dish cycle is self-resetting — tank recovers to setpoint within the 15s drying phase (only 7s of heating needed), leaving 8s of margin before the next dish. Outlet temps throughout a 20-dish session: **96–104°F on every draw**. Single element is sufficient for this pattern.
+
+  **Note:** the ΔT table in §2 (Power Staging) is labeled "at 0.5 GPM" but the +41°F / +82°F figures were calculated at 0.25 GPM. At 0.5 GPM the correct values are +20.5°F (1×) and +41°F (2×). The table needs correction; the label should read "at 0.25 GPM" or the values should be halved.
+
+  **Conclusion:** single-element performance is sufficient for the actual RV use pattern. The continuous-draw model (5 gal uninterrupted) is not representative. Build and commission single-element system first as planned.
 
 ---
 

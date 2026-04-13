@@ -779,4 +779,28 @@ Tank ½" NPT female outlet port
 
 ---
 
+## Entry 31 — Thermal Modeling: Initial Analysis (2026-04-13)
+
+**Question:** How long does it take to warm up from maintain (80°F) to boost (104°F), and how quickly does the tank recover after representative draws? Is a single element sufficient?
+
+The tank was initially modeled as a 14" spool (later corrected to 10" — see Entry 32), but the core thermal physics apply either way. The key parameters: inlet 50°F, flow 0.5 GPM, tank thermal mass ≈ 1.13 BTU/°F (water + SS tube combined). Element heat rates: 1× = 85.3 BTU/min (75.6°F/min static), 2× = double. Static warm-up from 80°F to 104°F takes ~19 seconds (1×) or ~10 seconds (2×) — fast in either case. The tank time constant during 0.5 GPM flow is only 16 seconds (thermal mass divided by mass flow rate), meaning the tank equilibrates quickly to a flow-through steady state.
+
+The surprising finding was that recovery time is never the binding constraint — the tank is so small that it returns to setpoint in under 30 seconds regardless of draw size. The real metric is outlet temperature *during* the draw. At 0.5 GPM flow, the flow-through steady-state outlet temperature is 70.5°F (1×) or 91°F (2×). Both hand-wash and dish-basin draws far exceed the tank volume (0.119 gal), so the tank is flushed within seconds and outlet temperature converges to steady state within about one minute of continuous flow. This made 1 element look marginal for a 5-gal dish basin — after the first minute the user would receive only ~71°F water.
+
+A secondary finding was an error in the plan.md Power Staging table: the ΔT values (+41°F, +82°F) were labeled "at 0.5 GPM" but actually correspond to 0.25 GPM. At 0.5 GPM the correct values are +20.5°F and +41°F. The table was corrected to show both flow rates. The continuous-draw model also turned out to be the wrong model entirely — see Entry 32.
+
+---
+
+## Entry 32 — Thermal Modeling: RV Dish-Wash Pattern and Single-Element Conclusion (2026-04-13)
+
+**Question:** Does the actual RV dish-wash pattern change the single-element conclusion?
+
+The dish basin was originally modeled as a 5-gal continuous draw — a worst-case that is not how dishes are actually washed in a water-scarce RV. The real pattern is intermittent: 4s wet draw → 5s hand-washing the dish → 4s rinse draw → 15s drying and stacking. Each dish uses only 8 seconds of flow (0.067 gal); the remaining 20 seconds of the 28s cycle are no-flow. Over 20 dishes this uses ~1.33 gal — 73% less water than a 5-gal continuous pour. The continuous draw model was simply the wrong model to apply.
+
+The 20s off-time between draws is the critical feature thermally. Tracing through one dish cycle at boost setpoint with 1 element: the 4s wet draw drops the tank from 104°F to 96.6°F (only 1/4 of a time constant, so the drop is modest). The 5s wash period recovers 6.3°F to 102.9°F. The 4s rinse draw drops back to 95.7°F. The 15s drying period is enough to recover 18.9°F — but only 8.3°F is needed to reach setpoint, so the element reaches 104°F in about 7 seconds and cuts off, with 8 seconds of drying to spare. The cycle is exactly self-resetting. Outlet temperatures throughout a 20-dish session stay between 96°F and 104°F on every single draw.
+
+**Conclusion: one element is sufficient.** The original concern arose from modeling a use pattern that does not reflect actual RV behavior. The intermittent nature of water-conserving dish washing is precisely what the small tank handles well — each short draw only partially depletes the thermal store, and the element fully recovers setpoint within the off-time. Continuous-draw performance (the 2-element argument) is a non-scenario for this system. Build single-element first as planned.
+
+---
+
 *Journal continues as design progresses. See `plan.md` for current state.*
