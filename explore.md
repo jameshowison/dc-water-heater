@@ -740,4 +740,26 @@ Tank ½" NPT female outlet port
 
 ---
 
+## Entry 29 — Winterization: Residual Water at Element Base (2026-04-13)
+
+**Question:** After winterizing (blowing lines, draining), ~1" of water remains pooled at the bottom of the horizontal triclamp spool around the U-bend element base. The triclamp tank sits 2' above the Suburban tank, so most water drains back by gravity through the inlet. Does the residual water pose a freeze damage risk?
+
+**Context:** The element enters from the right end cap (lowest point of the tank). The inlet is at bottom-left. After opening the system and allowing gravity drain-back, the spool retains a small pool at the element end. The top half of the 2" spool bore is air.
+
+**Analysis:**
+
+- **Ice expansion direction:** With ~1" of water in a 2" tube, the upper half of the spool is air. The ~9% volumetric expansion on freezing pushes the ice surface upward into the air gap. There is no sealed cavity, so no pressure confinement. The SS spool and TC fittings are not at risk.
+
+- **Element sheath (Incoloy):** Ice forms around the *outside* of the sheath, not inside it. The Incoloy sheath is a sealed metal tube — water cannot enter. Ice encasing the sheath simply floats upward as it expands. Incoloy handles freeze-thaw cycles routinely (residential outdoor element installations); no damage risk.
+
+- **U-bend geometry:** Both legs of the U exit upward through the right end cap fitting. Any water at the U's low point is external to the sheath; it expands into the air headspace above. The U-bend does not create a trapped sealed cavity.
+
+- **Thread area (1" FNPT adapter):** Small amount of water may be present in the threaded engagement. With air space available above and the threads not forming a sealed dead-end cavity, freeze expansion finds a path.
+
+**Resolution:** The residual ~1" at the element base is not a freeze damage risk. The air headspace in the upper half of the spool provides sufficient expansion volume. No drain port or special blowout procedure is required beyond the existing practice (line blowout + gravity drain-back to Suburban). If maximum caution is desired, removing the element (same motion as current Suburban practice) fully empties the tank through the element port.
+
+**Status: resolved** — no design change needed; winterization procedure requires no modification.
+
+---
+
 *Journal continues as design progresses. See `plan.md` for current state.*
