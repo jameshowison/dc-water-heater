@@ -74,6 +74,8 @@ Custom triclamp stainless vessel (see explore.md Entry 8 for rationale and full 
 - Complete triclamp tank detailed physical assembly
 - Fit copper nipples in inlet and outlet side ports; surface-mount NTC thermistor on outlet nipple and snap disc on outlet nipple, both with thermal paste + self-fusing silicone tape
 - Insulate supply pipes between new under-counter triclamp tank and the old Suburban tank — uninsulated pipes are a standby heat loss path
+  - **Purchase:** PATIKIL 2" ID (51mm) foam pipe insulation (Lowe's) for the 2" OD triclamp spool body — standard IPS-sized "2 inch pipe" insulation is too large (fits 2.375" OD, not 2.00")
+  - **Purchase:** Frost King or Everbilt ½" foam pipe insulation (Home Depot or Lowe's) for ½" PEX supply runs
 
 ---
 
@@ -150,6 +152,7 @@ One P115 contactor per element; 1 or 2 elements fitted depending on heating rate
 
 - [ ] **Stripboard layout:** decide whether to build ESP32 driver circuit on stripboard now or breadboard for initial testing; not a design question, a build sequencing decision
 - [ ] **Hysteresis band:** characterize thermal lag at outlet thermistor vs element on/off at 0.5 GPM; set deadband wide enough to prevent rapid contactor cycling
+- [x] **Pressure switch / water pump interaction:** Pump off → pressure bleeds → heater shuts off. Acceptable behavior — if the pump is off, no water is being drawn and hot water maintenance is unnecessary. The pressure switch doubles as a "system awake" interlock. Do not have ESP32 drive the pump on when pressure drops. See explore.md Entry 26.
 - [x] **PRV (pressure relief valve):** No dedicated PRV needed. Open system (no check valve) means thermal expansion pushes back upstream in normal operation. Suburban's existing T&P valve covers the full interconnected pressure zone. Constraint: never add an isolation valve between the Suburban and triclamp — that would create a separate zone requiring its own PRV. See explore.md Entry 24.
 - [ ] **Winterization / blowout:** the DERNORD element enters from the right end cap and is the lowest point in the tank. A compressed-air blowout from the inlet port should clear the main tank body, but water pooled at and around the element base may not fully evacuate. Confirm whether residual water at the element poses freeze damage risk, and whether a drain port or specific blowout procedure is needed (e.g. blow from outlet, drain from inlet, or accept a small residual volume).
 - [ ] **ESP32 firmware (future task, park until hardware assembled):** thermostat logic, NTC Steinhart-Hart ADC conversion, hysteresis band, three-state button (off / maintain ~80°F / boost ~104°F), relay drive, watchdog timer. Off mode: relay de-energized, element off, tank cools to ambient — no target temperature maintained.

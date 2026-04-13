@@ -637,4 +637,28 @@ No new tank ports required. Tank BOM unchanged.
 
 ---
 
+## Entry 26 — Pressure Switch: Water Pump Interaction Analysis (2026-04-13)
+
+**Question:** Does the pressure switch create undesirable interactions with the RV water pump, particularly when the pump is switched off at night?
+
+**Background:** The RV pump maintains pressure when on tank water (not city hookup). The pump is sometimes deliberately switched off at night because it randomly cycles — a slow pressure bleed causes it to kick on, which is disruptive. The pressure switch on the heater inlet is set at 10–15 psi, well below the pump's normal operating range (~40 psi cut-in, ~60 psi cut-out). See Entry 23 for the pressure switch rationale.
+
+**Three pump-off scenarios analyzed:**
+
+1. **Pump switched off with no subsequent water draw:** pressure holds at ~40–60 psi. Switch stays closed. Heater continues running. No issue.
+
+2. **Pump switched off after drawing water:** pressure drops as supply depletes. Eventually falls below 10–15 psi. Heater shuts off. Acceptable — if someone drew water and switched the pump off, they're done for the night. No hot water needed.
+
+3. **Pump cycling due to slow bleed (the common case):** the random night cycling is caused by slow pressure bleed (likely through the pump's own check valve). Pump is switched off to stop the noise. With pump off, pressure bleeds toward zero overnight. Heater shuts off.
+
+**Conclusion:** In all three cases, heater-off-when-pump-off is acceptable behavior. The pressure switch effectively acts as a secondary "system awake" interlock in addition to its primary dry-fire protection role. This is a design benefit, not a problem: if the pump is off, no one is drawing water, and maintaining hot water temperature overnight is unnecessary.
+
+**One tempting but wrong response:** having the ESP32 drive the pump on when pressure drops. This would recreate the random-cycling problem. Do not do this.
+
+**Operational note:** turning on the water pump is the first step before drawing water. Easy to forget when used to city water hookup. If the pump is off and someone draws water, pressure drops quickly and the heater shuts off before the water gets warm — a useful reminder that the pump is off.
+
+**Status: resolved.** Pressure switch behavior with pump off is acceptable. No change to design.
+
+---
+
 *Journal continues as design progresses. See `plan.md` for current state.*
