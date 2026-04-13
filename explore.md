@@ -549,4 +549,46 @@ On further review, the concern is overstated for this application:
 
 ---
 
+## Entry 23 — Dry-Fire Protection: Option B Resolved; Pressure Switch on Inlet Line (2026-04-12)
+
+**Continuing from Entry 22.** Option A (thermal fuse on sheath) requires a new tank port and is deferred. This entry resolves Option B.
+
+**Option B re-examined — failure modes:**
+
+- Switch fails closed → no protection; element can run regardless of supply pressure. Equivalent to Option C (accept risk). Not worse than doing nothing.
+- Switch fails open → element never energizes. Immediately obvious (no hot water). This is the safe failure direction.
+
+The "doesn't cover all dry-fire scenarios" concern from Entry 22 is scoped to: element physically exposed to air while tank is still pressurized. This can't happen in normal use — the element is sealed into the right end cap. The only way this occurs is misassembly, which no sensor would catch. The actual risk scenario — **winterized tank + accidental power-on** — is directly addressed by Option B.
+
+**Pump cycling concern resolved:** RV pump cycles between ~40 psi (cut-in) and ~60 psi (cut-out). With the pressure switch threshold set at 10–15 psi, the switch never trips during normal pump cycling or accumulator coast-down. The switch only opens when the system is fully depressurized.
+
+**Homebrewing/RIMS precedent (checked):** RIMS tubes (short heated pipe sections, similar small-volume immersion element problem) use either a flow switch or operational discipline. No novel Option D emerged. Homebrewers who skip the flow switch accept the same risk as Option C. No new approach to adopt.
+
+**Float switch in 2" vessel (checked):** Impractical. The vessel ID is ~1.75". A float needs lateral or vertical travel to register level change — the geometry doesn't support it. In a pressurized system the tank goes from full to empty in one blow-out event, not gradually. No useful intermediate level to detect. Dropped.
+
+**Placement decision — inlet vs. outlet:**
+
+The pressure switch needs to be inline in the plumbing (not a new tank port). A tee fitting on either the inlet or outlet line would both work in a static pressurized system. **Inlet side is preferred:**
+
+- Senses that the supply is pressurized, independent of the tank contents
+- Closing the supply valve → pressure drops → element de-energizes, even while the tank still holds hot water
+- More conservative: protects against the supply-cut-off scenario, not just the tank-empty scenario
+
+Outlet-side placement would work but is slightly less conservative — it only confirms the tank output side is pressurized, not that supply is live.
+
+**Resolved architecture:**
+
+- ½" NPT tee on the inlet PEX supply run, upstream of the tank inlet side port
+- ½" → ¼" NPT bushing, or a ¼" NPT pressure switch directly if available
+- Normally-open (NO) contacts; set point 10–15 psi (well below RV pump cut-in ~40 psi)
+- Wired in series with the 12V coil signal alongside the snap disc
+
+Coil signal chain: `ESP32 GPIO → relay (Pololu 2482) → snap disc NC → pressure switch NO (closes ≥10–15 psi) → P115 coil`
+
+No new tank ports required. Tank BOM unchanged.
+
+**Status: resolved.** Option B with inlet-line pressure switch is the dry-fire protection approach.
+
+---
+
 *Journal continues as design progresses. See `plan.md` for current state.*

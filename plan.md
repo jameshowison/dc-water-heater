@@ -143,10 +143,12 @@ One P115 contactor per element; 1 or 2 elements fitted depending on heating rate
 | Thermistor | NTC 10kΩ @ 25°C, B=3950, M4 probe | TBD |
 | Relay module | Pololu 2482 (Basic SPDT Relay Carrier, 12VDC, active-high EN pin) × 2 — one per contactor | TBD |
 | Snap disc thermostat | NC, opens at 110°F | TBD |
+| Pressure switch | NO, ¼" NPT, set point 10–15 psi, potable-water rated | TBD |
+| Inlet tee + bushing | ½" NPT tee + ½"→¼" NPT bushing (for pressure switch tap on inlet line) | TBD |
 
 ### Open Questions
 
-- [ ] **Water level / dry-fire protection:** UNDECIDED. The snap disc on the outlet copper nipple is NOT adequate for dry-fire protection — it measures water temperature and has no thermal path to the element in a dry-fire condition (see explore.md Entry 22). The DERNORD 48V/1500W element has no built-in ECO disc. Best option is a thermal fuse in contact with the element sheath (industrial standard practice), but this requires a thermowell with a dedicated NPT port — current tank BOM has both side ports spoken for. **Next: explore Option B — pressure switch in the supply line wired in series with coil signal** as an alternative that avoids the port constraint. Also explore float switch options inside the 2" triclamp vessel. Also explore how home brewing/fermentation heating avoids dry-firing (similar small vessel + immersion element problem).
+- [x] **Water level / dry-fire protection:** RESOLVED — pressure switch on inlet supply line (see explore.md Entries 22–23). Snap disc is not adequate for dry-fire (no thermal path to element in dry-fire condition). Thermal fuse on sheath (Option A) requires a new tank port — deferred. Float switch impractical in 2" vessel. **Option B adopted:** normally-open pressure switch (10–15 psi set point) on the inlet PEX run, wired in series with the 12V coil signal. No new tank ports required; tank BOM unchanged. Coil signal chain: `ESP32 GPIO → relay → snap disc NC → pressure switch NO → P115 coil`. Add a ½" NPT tee on the inlet line with a ½"→¼" NPT bushing for the switch.
 - [x] **Outlet thermistor placement:** resolved — NTC surface-mounted on copper outlet nipple with thermal paste and self-fusing silicone tape (see Sensor nipples in BOM above)
 - [ ] **Stripboard layout:** decide whether to build ESP32 driver circuit on stripboard now or breadboard for initial testing; not a design question, a build sequencing decision
 - [ ] **Hysteresis band:** characterize thermal lag at outlet thermistor vs element on/off at 0.5 GPM; set deadband wide enough to prevent rapid contactor cycling
