@@ -803,4 +803,24 @@ The 20s off-time between draws is the critical feature thermally. Tracing throug
 
 ---
 
+## Entry 34 — Hands-Free Faucet: Touchless Options Surveyed (2026-04-13)
+
+**Context:** The RV dish-wash pattern (20 × 4s draws) involves frequent on/off cycling with wet hands, leading to water on the counter. A hands-free trigger at the faucet would eliminate this. Foot pedal was ruled out first (Entry 33); this entry covers the remaining options.
+
+**Commercial/institutional sensor faucets (Symmons, Chicago Faucets HyTronic):** Designed for pre-tempered single supply — architecturally a good fit since the triclamp tank delivers water at setpoint with no cold mixing needed. Rated for millions of cycles. However, the commercial kitchen versions are wall-mount gooseneck (wrong form factor for RV deck-mount sink), and the deck-mount bathroom versions available on eBay are lavatory units, not kitchen units. Power is typically 6V (4×AA) or low-voltage AC. Available used on eBay but form factor mismatch makes these a poor fit.
+
+**Consumer residential touchless kitchen faucets (Moen MotionSense Wave, Delta Touch2O):** Single-hole deck-mount pulldown faucets designed for kitchen sinks — correct form factor. Connect hot supply only, cap cold inlet, pre-set temperature lever to full hot; the solenoid opens/closes regardless of whether cold is connected. Power via 6×AA batteries (~12–18 months) or optional AC adapter; a 12V→9V Pololu-type converter off the existing rail is a clean alternative. Moen MotionSense Wave is the top pick: single side-mounted sensor (wave to activate) avoids accidental triggers from water splashing on the spout, which affects touch-activated models like the Delta Touch2O. Available new for ~$250–350; eBay used/refurbished is the preferred path to reduce cost.
+
+**ESP32 solenoid option (future):** Instead of replacing the faucet, keep the existing faucet, add a standalone NC solenoid valve (½" NPT, 12V DC) at the tank outlet after the shutoff valve, and add a wave/proximity sensor at the faucet position wired to a relay channel on the ESP32. The hot water path stays short (no toe-kick detour). This avoids full faucet replacement and uses the existing 12V rail directly, but adds firmware scope to the ESP32 (sensor input, relay drive, possibly debounce logic). Kept as an option to explore once the single-element tank system is built and characterized.
+
+**Decision:** Preferred near-term path is a residential touchless kitchen faucet (Moen MotionSense Wave or equivalent) sourced used on eBay. ESP32 solenoid approach is a viable alternative to revisit later.
+
+---
+
+## Entry 33 — Hands-Free Faucet: Foot Pedal Ruled Out (2026-04-13)
+
+The PedalWorks-style hydraulic foot pedal (PVI-21) was considered for the hands-free faucet goal. When placed after the tank on the hot outlet side, the pedal box sits at the toe kick and forces the hot water path to detour down to the floor and back up to the faucet — adding exactly the cold-slug pipe volume the system is designed to eliminate. Placing it before the tank on the cold inlet sideavoids the hot-path detour but isolates the pressure switch from pump pressure when the pedal is closed and requires the faucet handle to be permanently pre-set, removing independent temperature control. A solenoid valve mounted directly at the tank outlet — with no toe-kick detour — addresses the same hands-free goal without either problem.
+
+---
+
 *Journal continues as design progresses. See `plan.md` for current state.*

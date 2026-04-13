@@ -82,7 +82,7 @@ Custom triclamp stainless vessel (see explore.md Entry 8 for rationale and full 
   - **Purchase:** PATIKIL 2" ID (51mm) foam pipe insulation (Lowe's) for the 2" OD triclamp spool body — standard IPS-sized "2 inch pipe" insulation is too large (fits 2.375" OD, not 2.00")
   - **Purchase:** Frost King or Everbilt ½" foam pipe insulation (Home Depot or Lowe's) for ½" PEX supply runs
   - **Future task:** determine appropriate insulation for braided stainless supply line (braided SS exterior not compatible with standard foam sleeve adhesion)
-  - **Future task:** investigate hands-free faucet options — foot pedal or touch-activated. The RV dish-wash pattern (20 × 4s draws) means frequent on/off cycling with wet hands, putting water on the counter. A foot pedal or touch faucet would eliminate this. Requirements: ½" supply connection, under-counter compatible, 12V or battery powered if touch-activated. Evaluate whether existing faucet can be replaced or supplemented.
+  - **Future task:** hands-free faucet — replace existing faucet with a touchless motion-sensor unit. Preferred path: Moen MotionSense Wave (or equivalent) purchased used/refurbished on eBay to reduce cost; connect hot supply only, cap cold inlet, pre-set temperature handle to full hot. Power via 6×AA batteries or 12V→9V converter off existing rail. Foot pedal ruled out (see explore.md Entry 33). Alternative to explore: keep existing faucet, add standalone NC solenoid valve at outlet + wave/proximity sensor wired to ESP32 relay channel — avoids full faucet replacement but adds firmware scope (see explore.md Entry 34).
 
 ---
 
