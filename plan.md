@@ -66,7 +66,8 @@ Custom triclamp stainless vessel (see explore.md Entry 8 for rationale and full 
 | Inlet (bottom-left) | 2" TC spool with ½" NPT side port, PEX adapter |
 | Outlet (top-right) | 2" TC spool with ½" NPT side port |
 | Outlet copper nipple | ½" NPT × 2" copper nipple — thermal bridge for NTC thermistor and snap disc (copper conducts ~25× better than SS); sensors mount on nipple body under foam insulation |
-| Faucet shutoff valve | ½" NPT inline shutoff — after outlet nipple, before faucet; allows heater isolation for maintenance without cutting all water | TBD — faucet connection beyond shutoff not yet sorted |
+| Faucet shutoff valve | Quarter-turn ball valve, ½" NPT × ½" NPT — after outlet nipple; allows heater isolation for maintenance without cutting all water | TBD |
+| Faucet connection | ½" FIP → ⅜" OD compression braided supply line, shortest available run; insulate braided run (insulation type TBD — braided SS exterior differs from PEX) | TBD |
 | Clamps | 4× 2" hex bolt TC clamps |
 | Gaskets | 4× EPDM (compliant, RV vibration tolerant) |
 | Insulation | 2" foam pipe sleeve + end foam |
@@ -74,10 +75,11 @@ Custom triclamp stainless vessel (see explore.md Entry 8 for rationale and full 
 **Build tasks (not design questions):**
 - Complete triclamp tank detailed physical assembly
 - Fit 2" copper nipple into outlet side port; mount bead NTC thermistor and snap disc on nipple body, both as close to tank wall as possible, with thermal paste + self-fusing silicone tape, then cover with foam insulation sleeve — sensors go under insulation so air-cooling is eliminated
-- Install inline shutoff valve after outlet nipple (faucet connection beyond shutoff TBD)
+- Install quarter-turn ball valve after outlet nipple; connect braided supply line (shortest available) from valve to faucet hot-water port; insulate braided run (insulation type TBD)
 - Insulate supply pipes between new under-counter triclamp tank and the old Suburban tank — uninsulated pipes are a standby heat loss path
   - **Purchase:** PATIKIL 2" ID (51mm) foam pipe insulation (Lowe's) for the 2" OD triclamp spool body — standard IPS-sized "2 inch pipe" insulation is too large (fits 2.375" OD, not 2.00")
   - **Purchase:** Frost King or Everbilt ½" foam pipe insulation (Home Depot or Lowe's) for ½" PEX supply runs
+  - **Future task:** determine appropriate insulation for braided stainless supply line (braided SS exterior not compatible with standard foam sleeve adhesion)
 
 ---
 
@@ -92,6 +94,8 @@ Custom triclamp stainless vessel (see explore.md Entry 8 for rationale and full 
 **Build task:** measure actual cold resistance on delivery.
 
 This is ordered, but currently have a 1000W dernord element with same thread.
+
+**Build sequencing:** Build and commission the single-element system first. Run performance tests (warm-up time, recovery time, maintain/boost behavior across representative draws) before deciding whether a second element is warranted. The second element adds cabling, a second contactor, and a second relay channel — only justified if single-element performance is demonstrably inadequate for actual use.
 
 ### Power Staging (with 2× DERNORD elements)
 
@@ -158,6 +162,7 @@ One P115 contactor per element; 1 or 2 elements fitted depending on heating rate
 - [x] **PRV (pressure relief valve):** No dedicated PRV needed. Open system (no check valve) means thermal expansion pushes back upstream in normal operation. Suburban's existing T&P valve covers the full interconnected pressure zone. Constraint: never add an isolation valve between the Suburban and triclamp — that would create a separate zone requiring its own PRV. See explore.md Entry 24.
 - [x] **Winterization / blowout:** the triclamp tank sits 2' above the Suburban; most water drains back by gravity on winterization. Residual ~1" at the element base is not a freeze risk — air headspace in the upper half of the spool absorbs expansion, Incoloy sheath is not damaged by external ice, and no sealed cavity forms. No drain port or special procedure needed. Removing the element (same as Suburban practice) fully drains if desired. See explore.md Entry 29.
 - [ ] **ESP32 firmware (future task, park until hardware assembled):** thermostat logic, NTC Steinhart-Hart ADC conversion, hysteresis band, three-state button (off / maintain ~80°F / boost ~104°F), relay drive, watchdog timer. Off mode: relay de-energized, element off, tank cools to ambient — no target temperature maintained.
+- [ ] **Model boost warm-up and recovery time (do before deciding on second element):** for representative draws (hand wash ~0.5 gal, dish basin ~5 gal), model: (a) time to reach boost setpoint from maintain setpoint at 1× and 2× elements; (b) recovery time after each draw type at 1× and 2× elements. Use results to set expectations and decide whether single-element performance is sufficient.
 
 ---
 
