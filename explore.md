@@ -611,19 +611,29 @@ No new tank ports required. Tank BOM unchanged.
 
 ---
 
-## Entry 25 — Control Supply: Existing 12V Rail vs Dedicated Buck Converter (2026-04-12)
+## Entry 25 — Control Supply: Existing 12V Rail vs Dedicated Buck Converter (2026-04-12, updated 2026-04-13)
 
 **Question:** How should the ESP32 + relay modules be powered — from a buck converter on the 48V bus, or from the existing RV 12V rail?
 
+**Battery voltage range (corrected):** 16S LiFePO4 at 3.55V/cell max = **56.8V full-charge max**, 48V nominal. All buck converter ratings must be evaluated against 56.8V, not the nominal 48V.
+
 **Option A — Existing 12V Victron rail (preferred):** The RV has a Victron 360W 12V supply that is lightly loaded. Tapping it for the control circuit adds negligible load (~300–400mA typical for ESP32 + 2 relay coils) and requires no additional hardware. Simpler, one less component to fail.
 
-**Option B — Dedicated buck converter:** Pololu APM81815 (#5269). Specs: 12.1–72V input (80V absolute max), 12V fixed output, 0.8A typical max at 48V input, board 0.4"×0.75"×0.13". Input voltage headroom is good: 48V LiFePO4 (16 cells) charges to ~58.4V, well within the 72V rating. Output current is sufficient: ESP32 peak ~240mA + 2× relay coil ~50mA each = ~340mA typical. The D42V55F12 (#5577, 4.5A, 60V max) was also considered but its 60V max input leaves only 1.6V margin over charge voltage — too tight for a 48V LiFePO4 system.
+**Option B — Dedicated buck converter, two candidates evaluated:**
 
-**Preferred: Option A.** Use the existing 12V rail. The APM81815 is the right buck converter if a self-contained 48V-only supply is ever needed (e.g., if the 12V rail is unavailable or if the control circuit is installed remote from the 12V distribution).
+*Pololu APM81815 (#5269):* 12.1–72V input (80V absolute max), 12V fixed output, 0.8A max at 48V input, board 0.4"×0.75"×0.13". Margin over 56.8V: 15.2V. No input cap required. Most conservative choice.
+
+*Pololu D45V5F12 (#5437):* 12.5–65V input (65V absolute max), 12V fixed output, up to 700mA, board 0.3"×0.45"×0.11". Margin over 56.8V: 8.2V. Requires a 33μF electrolytic on the input to suppress hot-plug LC spikes — this is Pololu's documented mitigation for this part. With the cap in place, spike concern is resolved. The Victron distribution bar also has substantial bus capacitance from other equipment, which further damps transients. Smaller board than APM81815, similar current capability. Co-equal option.
+
+*D42V55F12 (#5577) rejected:* 60V max leaves only 3.2V over 56.8V — insufficient margin.
+
+*D45V5F12 vs APM81815:* D45V5F12 is smaller and adequate with the cap; APM81815 needs no cap and has more headroom. Either is appropriate for Option B.
+
+**Preferred: Option A.** Use the existing 12V rail. Either buck converter is appropriate if a self-contained 48V-only supply is ever needed.
 
 **One consideration for Option A:** the control circuit depends on a separate supply. If the 12V rail is cut while the 48V heating circuit is energized, the contactors drop out (coil de-energized) and elements go cold — safe outcome. Snap disc hardware safety is independent of supply and remains functional regardless.
 
-**Status:** prefer existing 12V rail; APM81815 documented as fallback.
+**Status:** prefer existing 12V rail; D45V5F12 or APM81815 documented as fallback options.
 
 ---
 

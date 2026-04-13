@@ -1,7 +1,7 @@
 # DC Water Heater — Current Plan
 
 **Repo:** DC-water-heater  
-**RV battery system:** 48V, 192Ah, 200A continuous delivery  
+**RV battery system:** 48V nominal, 192Ah, 200A continuous delivery; 16S LiFePO4, 3.55V/cell max → **56.8V full-charge max**. All components in the power path must be rated for the full voltage range (nominal 48V, max 56.8V). Many DC elements and regulators are marketed at "48V" but rated only to 50–55V — always verify spec against 56.8V and prefer 60V-rated parts where available.  
 **Last updated:** see git log  
 
 For full design history and decision rationale, see `explore.md`.
