@@ -147,8 +147,8 @@ One P115 contactor per element; 1 or 2 elements fitted depending on heating rate
 |---|---|---|
 | Microcontroller | AITRIP ESP32-WROOM-32, 30-pin DevKit, CP2102 USB-C (ESP-WROOM-32) | on hand |
 | Contactor (one per element) | P115BDA (12V coil, 50A rated) | on hand |
-| Control supply | **Preferred: existing Victron 12V rail** (360W, lightly loaded). Alternative: Pololu APM81815 buck (#5269, 12.1–72V in, 12V/0.8A out) if self-contained 48V supply needed. See explore.md Entry 25. | TBD |
-| Thermistor | NTC 10kΩ @ 25°C, B=3950, bead type with leads | TBD |
+| Control supply | Existing Victron 12V rail (360W, lightly loaded) — **settled**. Fallback if self-contained 48V supply ever needed: Pololu D45V5F12 (57V max in, 12V out) or APM81815 (#5269, 12.1–72V in, 12V/0.8A out); see explore.md Entry 25. | Settled |
+| Thermistor | AILEWEI MF52A, NTC 10kΩ @ 25°C, B=3950, ~2.5mm bead, tinned copper leads ≥25mm; see explore.md Entry 30 | Ordered |
 | Relay module | Pololu 2482 (Basic SPDT Relay Carrier, 12VDC, active-high EN pin) × 2 — one per contactor | TBD |
 | Snap disc thermostat | NC, opens at 113°F (45°C) — see explore.md Entry 27 for trip point rationale and TMV contingency | TBD |
 | Pressure switch | NO, ¼" NPT, set point 10–15 psi, potable-water rated | TBD |

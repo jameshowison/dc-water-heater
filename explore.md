@@ -762,4 +762,21 @@ Tank ½" NPT female outlet port
 
 ---
 
+## Entry 30 — NTC Thermistor Selection: MF52A Bead (2026-04-13)
+
+**Question:** Which bead NTC thermistor to use for surface-mounting on the outlet copper nipple?
+
+**Spec required:** 10kΩ @ 25°C, B=3950, bead type with leads — per Entry 27.
+
+**Candidates evaluated:**
+
+- **MF52A bead NTC (selected):** ~2.5mm epoxy/glass bead, tinned copper leads ≥25mm. Bead is small enough to press flush against the 21mm OD copper nipple with thermal paste filling the curve gap. Held with self-fusing silicone tape. Naturally conformable to curved surface. Exact match to spec.
+- **Adafruit 4890 Ultra Thin:** flat 20mm × 4.5mm × 0.5mm strip, designed for flat-surface taping. Would need to bow across its width on a curved nipple; less natural contact than a tiny bead. Rejected for this geometry.
+
+**Selected:** AILEWEI MF52A 10K 3950, 10-pack (Amazon B0D5DLTVCM). Purchased 2026-04-13.
+
+**Status: resolved.** Part ordered; no further design work needed for thermistor selection.
+
+---
+
 *Journal continues as design progresses. See `plan.md` for current state.*
