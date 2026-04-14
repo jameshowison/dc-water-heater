@@ -803,6 +803,28 @@ The 20s off-time between draws is the critical feature thermally. Tracing throug
 
 ---
 
+## Entry 35 — Hands-Free Faucet: DIY Solenoid + mmWave Sensor Path (2026-04-13)
+
+**Context:** Entry 34 surveyed commercial touchless faucet options and noted the DIY solenoid + sensor path as a viable alternative. This entry develops that path further based on sensor type analysis and placement constraints.
+
+**IR sensor types clarified:** "IR sensor" covers three distinct architectures. A *reflective proximity* sensor (TCRT5000, Sharp GP2Yxxx) is a single unit that emits IR and detects the bounce-back from a nearby object — the hand itself is the reflector; no separate reflector or second unit needed. A *break-beam* pair uses a separate emitter and receiver across the space — no reflector, but two mounting points required. A *retroreflective* sensor is a single unit paired with dedicated prism tape — does need the tape target. For a faucet trigger, reflective proximity is the natural type: one unit, aimed at the hand zone, no secondary component.
+
+**Placement options:**
+- *Under-spout / above-sink:* A downward-pointing reflective IR proximity sensor works cleanly here — hand entering the bowl interrupts the return beam. mmWave from above also works but the detection lobe is wide and needs careful range-gate tuning to avoid triggering on the sink basin itself.
+- *Front-of-cabinet (co-located with 3-mode switch):* mmWave is the better fit from this angle. A reflective IR sensor aimed horizontally across the sink area has poor distance discrimination; mmWave range gates can constrain the active zone to a hand-in-sink band (~10–50 cm) while ignoring the basin at rest and people walking past.
+
+**mmWave sensor selected: LD2410.** ~22 × 16 mm board; UART interface to ESP32; 3.3V logic, 5V supply; ~$5–8. Has separate "motion" and "presence" output modes — "motion" is preferred here to avoid triggering on a static wet dish sitting in the bowl. Configurable near/far range gates via UART; set at commissioning to cover the hand-in-sink zone from the cabinet front without extending beyond the sink edge. Works through thin wood or plastic panel, unaffected by water or grease on the sensor face.
+
+**Solenoid spec (preliminary):** NC, ½" NPT, 12V DC, potable-water rated (NSF-61 preferred). Mounted between the tank outlet ball valve and the braided supply line to the faucet — no toe-kick detour, short hot-water path preserved. Powered from the existing 12V Victron rail via an ESP32 relay channel (Pololu 2482 or equivalent). NC solenoids require minimum ~3–5 PSI inlet differential to operate; RV supply pressure (30–45 PSI) is well above this. Water hammer: consider slow-close type or confirm the existing aerator and short line provide sufficient damping.
+
+**Firmware scope:** sensor input on ESP32 GPIO, relay drive, hold timer (flow stays on for N seconds after last sensor trigger, suggested 2–4 s to prevent choppy cycling during dish wash), debounce. Approximately one modest state machine alongside the thermostat logic. Not a blocking complexity concern.
+
+**TBD:** Exact sensor mount position and range gate settings — verify detection lobe covers the hand-in-sink zone from the chosen cabinet-front location without covering beyond the sink; confirm at commissioning. Solenoid part number and order. Firmware implementation (parked until hardware assembled).
+
+**Status:** DIY solenoid + LD2410 mmWave is now the preferred path over commercial faucet replacement. Existing faucet kept; handle pre-set to full hot. No solenoid or sensor ordered yet.
+
+---
+
 ## Entry 34 — Hands-Free Faucet: Touchless Options Surveyed (2026-04-13)
 
 **Context:** The RV dish-wash pattern (20 × 4s draws) involves frequent on/off cycling with wet hands, leading to water on the counter. A hands-free trigger at the faucet would eliminate this. Foot pedal was ruled out first (Entry 33); this entry covers the remaining options.

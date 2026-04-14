@@ -82,7 +82,7 @@ Custom triclamp stainless vessel (see explore.md Entry 8 for rationale and full 
   - **Purchase:** PATIKIL 2" ID (51mm) foam pipe insulation (Lowe's) for the 2" OD triclamp spool body — standard IPS-sized "2 inch pipe" insulation is too large (fits 2.375" OD, not 2.00")
   - **Purchase:** Frost King or Everbilt ½" foam pipe insulation (Home Depot or Lowe's) for ½" PEX supply runs
   - **Future task:** determine appropriate insulation for braided stainless supply line (braided SS exterior not compatible with standard foam sleeve adhesion)
-  - **Future task:** hands-free faucet — replace existing faucet with a touchless motion-sensor unit. Preferred path: Moen MotionSense Wave (or equivalent) purchased used/refurbished on eBay to reduce cost; connect hot supply only, cap cold inlet, pre-set temperature handle to full hot. Power via 6×AA batteries or 12V→9V converter off existing rail. Foot pedal ruled out (see explore.md Entry 33). Alternative to explore: keep existing faucet, add standalone NC solenoid valve at outlet + wave/proximity sensor wired to ESP32 relay channel — avoids full faucet replacement but adds firmware scope (see explore.md Entry 34).
+  - **Future task:** hands-free faucet — keep existing faucet; add NC solenoid valve (½" NPT, 12V DC, potable-water rated) between tank outlet ball valve and braided supply line; add LD2410 mmWave sensor co-located with the 3-mode switch at cabinet front; ESP32 relay channel opens solenoid while hand is detected + N-second hold timer. Pre-set faucet handle to full hot. Powered from 12V Victron rail. Foot pedal ruled out (see explore.md Entry 33); commercial touchless faucet (Moen MotionSense Wave) remains fallback if DIY path proves problematic. TBD: solenoid part number, sensor mount position and range gate settings (verify at commissioning), firmware implementation (park until hardware assembled). See explore.md Entries 34–35.
 
 ---
 
@@ -156,9 +156,13 @@ One P115 contactor per element; 1 or 2 elements fitted depending on heating rate
 | Snap disc thermostat | NC, opens at 113°F (45°C) — see explore.md Entry 27 for trip point rationale and TMV contingency | TBD |
 | Pressure switch | NO, ¼" NPT, set point 10–15 psi, potable-water rated | TBD |
 | Inlet tee + bushing | ½" NPT street tee (one male end to screw into tank inlet port, two female) + ½"→¼" NPT bushing for pressure switch branch; run port to PEX supply adapter | TBD |
+| 3-mode switch | Physical switch for off / maintain / boost states; panel-mount at cabinet front; wiring to ESP32 GPIO. Type and part TBD — needs to latch in three positions (e.g., 3-position rotary or rocker; momentary pushbutton requires firmware state machine). | TBD |
+| Solenoid valve (hands-free faucet) | NC, ½" NPT, 12V DC, potable-water rated; mounted at tank outlet after ball valve; driven by ESP32 relay channel. Part TBD. | TBD |
+| mmWave sensor (hands-free faucet) | LD2410, ~22 × 16 mm, UART to ESP32; co-mounted with 3-mode switch at cabinet front. ~$5–8. Range gate settings TBD at commissioning. | TBD |
 
 ### Open Questions
 
+- [ ] **3-mode switch spec:** choose physical switch type for off / maintain / boost. A 3-position latching rotary or rocker switch is simplest (each position directly maps to a GPIO state, no firmware debounce logic needed). A momentary pushbutton cycles through states in firmware but requires more code. Decide part and panel-mount approach; needs to fit cabinet-front panel alongside LD2410 sensor.
 - [ ] **Stripboard layout:** decide whether to build ESP32 driver circuit on stripboard now or breadboard for initial testing; not a design question, a build sequencing decision
 - [ ] **Hysteresis band:** characterize thermal lag at outlet thermistor vs element on/off at 0.5 GPM; set deadband wide enough to prevent rapid contactor cycling
 - [x] **Pressure switch / water pump interaction:** Pump off → pressure bleeds → heater shuts off. Acceptable behavior — if the pump is off, no water is being drawn and hot water maintenance is unnecessary. The pressure switch doubles as a "system awake" interlock. Do not have ESP32 drive the pump on when pressure drops. See explore.md Entry 26.
