@@ -6,6 +6,8 @@ This journal records the design explorations for a 48V DC water heating system i
 
 ---
 
+<a id="problem-statement"></a>
+
 ## Entry 1 — Problem Statement and Initial Requirements (background context)
 
 The existing RV water heater is a Suburban propane/electric combo tank. Core problems identified:
@@ -18,6 +20,8 @@ The existing RV water heater is a Suburban propane/electric combo tank. Core pro
 **Initial goal:** Replace the propane/electric system with a 48V DC system powered by the existing RV battery, optimized for low-flow faucet use.
 
 ---
+
+<a id="faucet-heater-tank-buffer"></a>
 
 ## Entry 2 — Faucet Heater Concept, Flow Geometries, and Tank Buffer (2026-03-21, chat: 7fb9973b)
 
@@ -74,6 +78,8 @@ At high outlet temperatures, scald risk is real. A TMV with a hard cap at 49°C 
 
 ---
 
+<a id="electric-heating-rules-of-thumb"></a>
+
 ## Entry 3 — Rules of Thumb for Electric Water Heating (2026-03-22, chat: c8fa0155)
 
 A dedicated session working out the physics of electric water heating from first principles, motivated by two things: annoyance at the "you need 5 gallons to wash dishes" claim in RV forums, and the question of whether the battery-as-buffer concept from an impulse cooktop could be extended to hot water.
@@ -127,6 +133,8 @@ A 4500W/52V element needs R = 0.6Ω. A 4500W/240V element has R = 12.8Ω. Gettin
 
 ---
 
+<a id="elex-teardown-rheem-vessel"></a>
+
 ## Entry 4 — DC Tankless Heater: Elex Teardown and Rheem Vessel Strategy (2026-03-23, chat: baaf5cff)
 
 **Elex 5.5 kW unit:**
@@ -176,6 +184,8 @@ Physical inspection revealed RTEX copper flow tubes are ~1¼" diameter — too s
 
 ---
 
+<a id="dc-electrolysis-rewind-hard-stop"></a>
+
 ## Entry 5 — DC Electrolysis Safety, Rewind Hard Stop, and Control Circuit BoM (2026-03-24, chat: 335e1db9)
 
 **Nichrome rewind risks:**
@@ -223,6 +233,8 @@ NTC thermistors (10kΩ @ 25°C, B=3950, M4 probe) at inlet and outlet
 
 ---
 
+<a id="incoloy-faucet-heater-full-design"></a>
+
 ## Entry 6 — In-Faucet Heater with Incoloy Element: Full Design (2026-03-31, chat: 990abbdd)
 
 **Two-stage architecture confirmed:**
@@ -259,6 +271,8 @@ Evaluated aluminum block with cartridge heaters as alternative vessel. For the b
 
 ---
 
+<a id="dernord-thread-copper-vessel"></a>
+
 ## Entry 7 — Dernord Element Thread and Copper Pipe Vessel (2026-03-31, chat: 5343810f)
 
 **Thread clarification:**
@@ -273,6 +287,8 @@ Explored 2" copper pipe as tank body with a soldered 1" NPT weld bung for the el
 - Triclamp offers cleaner, fully disassemblable construction
 
 ---
+
+<a id="triclamp-vessel"></a>
 
 ## Entry 8 — Triclamp Vessel: Pivot from Copper (2026-04-01, chat: 897332ec)
 
@@ -308,6 +324,8 @@ Explored 2" copper pipe as tank body with a soldered 1" NPT weld bung for the el
 
 ---
 
+<a id="dc-power-safety-research"></a>
+
 ## Entry 9 — DC Power Safety Research: Confirmation of Hard Stop (2026-04-01, chat: 1c02e9c2)
 
 Follow-up research session confirming the bare wire DC electrolysis conclusion from Entry 4.
@@ -322,6 +340,8 @@ Follow-up research session confirming the bare wire DC electrolysis conclusion f
 **Conclusion:** Prior hard stop confirmed. Sheathed (Incoloy) element is the only viable path for potable water at 48V DC.
 
 ---
+
+<a id="induction-heating"></a>
 
 ## Entry 10 — Induction Heating Deep Dive (2026-04-06, chat: 3d3a96e3)
 
@@ -349,6 +369,8 @@ The power electronics complexity (ZVS inverter design, resonant tank tuning, coi
 
 ---
 
+<a id="tube-volume-flow-calculations"></a>
+
 ## Entry 11 — Tube Volume and Flow Heating Calculations (2026-04-08, chats: 5383b80a and c6e81b48)
 
 Supporting sizing calculations:
@@ -361,6 +383,8 @@ Supporting sizing calculations:
 
 ---
 
+<a id="pressure-thermal-safety"></a>
+
 ## Entry 12 — Pressure and Thermal Safety in Triclamp Vessels (2026-04-12, chat: 440924ad)
 
 Standard EPDM-gasketed triclamp fittings rated ~150 PSI. Water reaches 150 PSI only at ~185°C — not achievable in normal operation. RV water systems typically lack the check valve that creates closed-system thermal expansion problems in residential plumbing; thermal expansion pushes back into the supply line. PRV added as good practice.
@@ -370,6 +394,8 @@ Thermal expansion risk if both valves are closed and vessel is heated (sealed in
 At RV supply pressure (~60–80 PSI): well below the 150 PSI EPDM limit. No pressure safety concern under normal operation.
 
 ---
+
+<a id="snap-disc-esp32-thermostat"></a>
 
 ## Entry 13 — Temperature Control: Snap Disc and ESP32 Thermostat (2026-04-12, chat: f9413753)
 
@@ -381,6 +407,8 @@ At RV supply pressure (~60–80 PSI): well below the 150 PSI EPDM limit. No pres
 
 ---
 
+<a id="faucet-body-heater-parked"></a>
+
 ## Entry 14 — Faucet Body Heater: Concept Parked (2026-04-12)
 
 **The concept:** A second heating stage at the point of use — a 2" SS sanitary tube body ~14" long (~840mL), DERNORD 48V/1500W element, Armaflex insulated, mounted vertically under the counter. Control via PIR motion sensor for predictive pre-heating, lever microswitch on faucet handle, NTC thermistor at outlet, and an NC solenoid gate held open only when water is at temperature. The idea was to eliminate any cold-water delay at the faucet and provide a boost stage fed from the upstream triclamp tank.
@@ -388,6 +416,8 @@ At RV supply pressure (~60–80 PSI): well below the 150 PSI EPDM limit. No pres
 **Decision:** Parked. The plan now covers a single-stage system: triclamp tank only. The faucet body heater adds significant complexity (additional element, solenoid gate, PIR, lever microswitch, second thermistor loop) before the simpler single-stage system has been built and validated. The concept is preserved here for future consideration once the tank stage is working.
 
 ---
+
+<a id="control-simplification-thermostat"></a>
 
 ## Entry 15 — Control Simplification: Thermostat Not FET/PWM (2026-04-12)
 
@@ -401,11 +431,15 @@ At RV supply pressure (~60–80 PSI): well below the 150 PSI EPDM limit. No pres
 
 ---
 
+<a id="tmv-removed"></a>
+
 ## Entry 16 — TMV Removed (2026-04-12)
 
 TMV (thermostatic mixing valve) was specified in Entry 2 for scald protection (hard cap at 49°C/120°F) and fine temperature control. With max setpoint now fixed at ~104°F (~40°C) — well below the 49°C scald threshold — there is no scald risk and no need for downstream mixing. Removed from design.
 
 ---
+
+<a id="flow-switch-removed"></a>
 
 ## Entry 17 — Flow Switch Removed; Contactor Simplified to P115 per Element (2026-04-12)
 
@@ -416,6 +450,8 @@ TMV (thermostatic mixing valve) was specified in Entry 2 for scald protection (h
 **Architecture settled:** one P115BDA contactor per element, driven by ESP32 via relay module. P115 is rated 50A — 62% derating at 31A per element, appropriate for switching duty. One or two elements may be fitted; each gets its own P115. ANL fuse remains upstream for overcurrent protection; snap disc in series with coil signal for hardware thermal cutoff.
 
 ---
+
+<a id="control-power-supply-architecture"></a>
 
 ## Entry 18 — Control Power Supply: 48V→12V Architecture (2026-04-12)
 
@@ -441,6 +477,8 @@ Must be rated for full-charge battery voltage, not nominal 48V. A 16S LiFePO4 ba
 
 ---
 
+<a id="plan-review-gap-analysis"></a>
+
 ## Entry 19 — Plan Review and Gap Analysis (2026-04-12)
 
 Full review of plan.md against the design history in explore.md. Items identified and resolved or added as open tasks:
@@ -463,6 +501,8 @@ Full review of plan.md against the design history in explore.md. Items identifie
 - **ESP32 firmware:** parked until hardware is assembled and tested.
 
 ---
+
+<a id="ss304-vs-316l"></a>
 
 ## Entry 20 — SS304 vs SS316L for Potable Water Contact (resolved)
 
@@ -496,6 +536,8 @@ On further review, the concern is overstated for this application:
 
 ---
 
+<a id="relay-module-boot-safety"></a>
+
 ## Entry 21 — Relay Module Selection: Active-High vs Active-Low, Boot Safety (2026-04-12)
 
 **Question:** The plan flagged the SRD-12VDC-SL-C relay module as TBD pending confirmation of active-high vs active-low behavior and safe boot state. If the module is active-low and the ESP32 GPIO floats low at power-on, the P115 contactor coil is briefly energized before firmware runs — element on before any temperature check.
@@ -527,6 +569,8 @@ On further review, the concern is overstated for this application:
 
 ---
 
+<a id="dry-fire-snap-disc-inadequate"></a>
+
 ## Entry 22 — Dry-Fire Protection: Snap Disc Inadequate; Thermowell-Based Fuse Under Consideration (2026-04-12)
 
 **Question:** Does the snap disc (NC, opens at 110°F, surface-mounted on outlet copper nipple) provide adequate dry-fire protection for the DERNORD element?
@@ -548,6 +592,8 @@ On further review, the concern is overstated for this application:
 **Status: undecided.** Tank port availability is the key constraint for Option A. Pressure switch (Option B) to be explored next as an alternative that doesn't require a new tank port.
 
 ---
+
+<a id="dry-fire-pressure-switch"></a>
 
 ## Entry 23 — Dry-Fire Protection: Option B Resolved; Pressure Switch on Inlet Line (2026-04-12)
 
@@ -591,6 +637,8 @@ No new tank ports required. Tank BOM unchanged.
 
 ---
 
+<a id="prv-not-needed"></a>
+
 ## Entry 24 — PRV: No Dedicated Valve Needed (2026-04-12)
 
 **Question:** Does the triclamp vessel require its own pressure relief valve (PRV/T&P valve) for thermal expansion protection?
@@ -610,6 +658,8 @@ No new tank ports required. Tank BOM unchanged.
 **Status: resolved.** No dedicated PRV needed. No new hardware or tank ports required.
 
 ---
+
+<a id="control-supply-12v-rail"></a>
 
 ## Entry 25 — Control Supply: Existing 12V Rail vs Dedicated Buck Converter (2026-04-12, updated 2026-04-13)
 
@@ -637,6 +687,8 @@ No new tank ports required. Tank BOM unchanged.
 
 ---
 
+<a id="pressure-switch-pump-interaction"></a>
+
 ## Entry 26 — Pressure Switch: Water Pump Interaction Analysis (2026-04-13)
 
 **Question:** Does the pressure switch create undesirable interactions with the RV water pump, particularly when the pump is switched off at night?
@@ -660,6 +712,8 @@ No new tank ports required. Tank BOM unchanged.
 **Status: resolved.** Pressure switch behavior with pump off is acceptable. No change to design.
 
 ---
+
+<a id="sensor-format-snap-disc-trip"></a>
 
 ## Entry 27 — Sensor Format, Mounting, and Snap Disc Trip Point (2026-04-13)
 
@@ -704,6 +758,8 @@ TMV is a contingency — do not purchase until 113°F snap disc behavior is char
 
 ---
 
+<a id="inlet-outlet-plumbing-stack"></a>
+
 ## Entry 28 — Outlet and Inlet Plumbing Stack (2026-04-13)
 
 **Question:** What fittings are needed at the inlet and outlet ports, accounting for the pressure switch, sensors, and faucet connection?
@@ -740,6 +796,8 @@ Tank ½" NPT female outlet port
 
 ---
 
+<a id="winterization"></a>
+
 ## Entry 29 — Winterization: Residual Water at Element Base (2026-04-13)
 
 **Question:** After winterizing (blowing lines, draining), ~1" of water remains pooled at the bottom of the horizontal triclamp spool around the U-bend element base. The triclamp tank sits 2' above the Suburban tank, so most water drains back by gravity through the inlet. Does the residual water pose a freeze damage risk?
@@ -762,6 +820,8 @@ Tank ½" NPT female outlet port
 
 ---
 
+<a id="ntc-thermistor-mf52a"></a>
+
 ## Entry 30 — NTC Thermistor Selection: MF52A Bead (2026-04-13)
 
 **Question:** Which bead NTC thermistor to use for surface-mounting on the outlet copper nipple?
@@ -779,6 +839,8 @@ Tank ½" NPT female outlet port
 
 ---
 
+<a id="thermal-modeling-initial"></a>
+
 ## Entry 31 — Thermal Modeling: Initial Analysis (2026-04-13)
 
 **Question:** How long does it take to warm up from maintain (80°F) to boost (104°F), and how quickly does the tank recover after representative draws? Is a single element sufficient?
@@ -791,6 +853,8 @@ A secondary finding was an error in the plan.md Power Staging table: the ΔT val
 
 ---
 
+<a id="thermal-modeling-rv-dish-wash"></a>
+
 ## Entry 32 — Thermal Modeling: RV Dish-Wash Pattern and Single-Element Conclusion (2026-04-13)
 
 **Question:** Does the actual RV dish-wash pattern change the single-element conclusion?
@@ -802,6 +866,8 @@ The 20s off-time between draws is the critical feature thermally. Tracing throug
 **Conclusion: one element is sufficient.** The original concern arose from modeling a use pattern that does not reflect actual RV behavior. The intermittent nature of water-conserving dish washing is precisely what the small tank handles well — each short draw only partially depletes the thermal store, and the element fully recovers setpoint within the off-time. Continuous-draw performance (the 2-element argument) is a non-scenario for this system. Build single-element first as planned.
 
 ---
+
+<a id="hands-free-diy-solenoid-mmwave"></a>
 
 ## Entry 35 — Hands-Free Faucet: DIY Solenoid + mmWave Sensor Path (2026-04-13)
 
@@ -825,6 +891,8 @@ The 20s off-time between draws is the critical feature thermally. Tracing throug
 
 ---
 
+<a id="hands-free-touchless-options"></a>
+
 ## Entry 34 — Hands-Free Faucet: Touchless Options Surveyed (2026-04-13)
 
 **Context:** The RV dish-wash pattern (20 × 4s draws) involves frequent on/off cycling with wet hands, leading to water on the counter. A hands-free trigger at the faucet would eliminate this. Foot pedal was ruled out first (Entry 33); this entry covers the remaining options.
@@ -839,9 +907,53 @@ The 20s off-time between draws is the critical feature thermally. Tracing throug
 
 ---
 
+<a id="hands-free-foot-pedal-ruled-out"></a>
+
 ## Entry 33 — Hands-Free Faucet: Foot Pedal Ruled Out (2026-04-13)
 
 The PedalWorks-style hydraulic foot pedal (PVI-21) was considered for the hands-free faucet goal. When placed after the tank on the hot outlet side, the pedal box sits at the toe kick and forces the hot water path to detour down to the floor and back up to the faucet — adding exactly the cold-slug pipe volume the system is designed to eliminate. Placing it before the tank on the cold inlet sideavoids the hot-path detour but isolates the pressure switch from pump pressure when the pedal is closed and requires the faucet handle to be permanently pre-set, removing independent temperature control. A solenoid valve mounted directly at the tank outlet — with no toe-kick detour — addresses the same hands-free goal without either problem.
+
+---
+
+<a id="electronics-path-review"></a>
+
+## Entry 36 — Electronics Path Review: Design Gaps Identified and Resolved (2026-04-13)
+
+Full top-to-bottom trace of the electronics path against plan.md, looking for issues before physical build.
+
+### Resolved in this session
+
+**Architecture diagram corrected — Victron 12V rail only.**
+The §4 control architecture block showed `48V bus → [48V→12V buck] → ESP32`. The settled decision (Entry 25) is to use the existing Victron 12V rail; the buck converter is documented only as a fallback. Both architecture diagrams (§2 overview and §4 detail) now show `[Victron 12V rail]` as the sole control supply.
+
+**Pololu 2482 contact selection documented — COM→NO required.**
+Entry 21 established the active-high rationale (EN=LOW → element off, safe at boot) but never stated which Pololu 2482 contact set to wire. The correct wiring is `12V → COM → NO → snap disc → pressure switch → P115 coil`. Using the NC contacts would invert logic — element on when ESP32 is off, reset, or crashed. This is now explicit in the plan coil signal chain and component table.
+
+**Second element requires a second tank — scope changed, section parked.**
+The plan previously described the second element as "optional extra hardware." On review: the existing triclamp tank has only one element port (the 2" TC × 1" FNPT adapter at the right end cap). There is no geometry for a second U-bend in the same spool. Adding a second element requires a second complete triclamp tank joined to the first via PEX. This is a significant plumbing addition, not an incremental wiring change. The second element section has been moved to a clearly marked Parked section. Revisit only after single-element system is built and characterized.
+
+**Safety chain routing for dual-element — designed and parked.**
+With two elements, both P115 contactors must lose coil power simultaneously when the snap disc or pressure switch trips. The correct architecture: place both safety devices on the **common 12V supply rail upstream of both relay modules**, not in the individual relay output legs. This way, a single snap disc and single pressure switch protect both elements while the ESP32 still independently controls each contactor via GPIO. Documented in the Parked section for when this path is revisited.
+
+**Ground topology confirmed — common negative.**
+The Victron 12V rail shares the common negative bus with the 48V battery. P115 coil, relay module GND, and ESP32 GND all reference the same negative. No isolated ground concern for the coil signal return path. Documented in §4 architecture block.
+
+**Pull-down resistors added to BOM.**
+Entry 21 specified 10kΩ pull-downs from each Pololu 2482 EN pin to GND for boot safety. These were documented in explore.md but not in the plan component table. Now added as a discrete BOM line item so they appear on the stripboard layout.
+
+**Solenoid terminology clarified.**
+Two distinct components in this design use solenoids or coils: (1) the Pololu 2482 relay module, which has an internal relay coil (this is a relay, not a solenoid valve); (2) the hands-free faucet water valve, which is an NC solenoid valve controlling water flow. The component table now uses distinct names: "Relay module (contactor)" for the Pololu 2482 and "Faucet water valve (hands-free faucet — parked)" for the water valve.
+
+**Power Staging table corrected and relocated.**
+The table previously used values calculated at 0.25 GPM but was labeled "at 0.5 GPM" — a known error. The table has been moved to the Second Element — Parked section (where it now lives alongside the dual-element scenario) and updated with correct dual-column headers showing both flow rates.
+
+### New open questions added to plan
+
+**NTC voltage divider fixed resistor:** Standard choice is 10kΩ (matches NTC nominal, puts divider midpoint at 1.65V at 25°C, good ADC sensitivity across 80–113°F). This is the first NTC voltage divider in this build; the resistor value needs to be confirmed and documented before firmware ADC math is written. Steinhart-Hart R conversion depends on knowing the divider resistance.
+
+**ESP32 VIN at 12V confirmation:** Must verify AITRIP 30-pin DevKit accepts 12V on VIN before first power-on. Standard ESP32 DevKit boards use AMS1117-3.3 + ME6211-5V regulators; VIN max is typically 12V but differs by board variant. Check schematic or regulator datasheet before connecting 12V.
+
+**LD2410 UART pin assignment:** ESP32 UART1 defaults to GPIO9/10, which conflict with flash memory. LD2410 UART must be remapped to UART2 (GPIO16/17) or other free pins. Resolve GPIO assignments for relay (GPIO25, GPIO26), 3-mode switch, and LD2410 UART as a complete group before firmware work begins.
 
 ---
 
